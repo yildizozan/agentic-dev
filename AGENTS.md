@@ -1,112 +1,71 @@
-# Agentic Development
+# AGENTS.md
 
-Bu depo, ajan tabanlı ve çok ajanlı geliştirme süreçleri için en iyi uygulamaları
-belirlemeyi amaçlar.
-
-Bir veya birden fazla ajanın; özellik geliştirme, hata giderme ve düzeltme gibi
-görevleri otonom biçimde, talep edilen doğrultuda gerçekleştirmesini hedefler.
-Ayrıca çok ajanlı sistemlerde ajanların birbiriyle çakışmasını veya birbirlerinin
-değişikliklerini bozmasını önleyerek gereksinimlerin eksiksiz karşılanmasını
-sağlamaya yönelik ilkeleri tanımlar.
+> ⚠ **Bu dosya bu rehber repo'sunda çalışan ajan içindir** — yani rehber
+> içeriğini düzenleyen ajan.
+>
+> **Kendi projendeki ajanlara kural arıyorsan bu dosya değil:**
+> → **[`templates/AGENTS.md`](templates/AGENTS.md)** (kopyala-yapıştır, tek dosya)
 
 ---
 
-## Ajan giriş noktası
+## Bu repo nedir
 
-**Bu dosyayı değiştirme.** Sahibi `agent:techlead` + insan (`docs/06-operations.md` §5.1).
-Ajan kendi kısıtlarını yazamaz.
+Ajanlarla yazılım geliştirme için bir **Markdown rehberi**. Kod ürünü yok,
+kurulacak bir şey yok. Ürün: kaynakları izlenebilir, sınırlılıkları dürüst içerik.
 
-Kuralların tamamı: [`README.md`](README.md) → repo haritası. Üç eksen:
-[sadakat](docs/02-spec-fidelity.md) · [çakışma](docs/03-concurrency.md) · [bütünlük](docs/04-codebase-integrity.md)
+## Rehbere katkı yaparken
 
-### Rolünü bul, kuralını oku
+### 1. Araştırmadan yazma
 
-| Rolün | Zorunlu oku |
-|---|---|
-| **Engineer** (backend/frontend/mobile/unity/flutter) | `templates/TESTING.md` · `docs/03` §1–4 · `docs/04` §5, §7 · `docs/06` §6 |
-| **QA** | `docs/02` §4 · `docs/05` §2, §4 · `docs/06` §3 |
-| **Tech Lead** | `docs/02` tümü · `docs/03` tümü · `docs/04` tümü |
-| **PM / Producer** | `templates/acceptance-criteria.md` · `docs/05` §2–3 · `docs/06` §4 |
-| **Security** | `docs/02` §3.7 · `docs/06` §5 |
-| **Designer** | `docs/05` §1 · ilgili `profiles/` |
+Herhangi bir anlamlı içerik değişikliğinden önce:
 
-Stack'in: [`profiles/backend.md`](profiles/backend.md) · [`profiles/flutter.md`](profiles/flutter.md) · [`profiles/unity.md`](profiles/unity.md)
+1. **Resmi/primary kaynak** ara (vendor dokümanı, paper, araç dokümanı).
+2. **Aynı konuyu Reddit'te** ara — çözüm kopyalamak için değil, gerçek failure
+   mode ve ergonomi riskini görmek için.
+3. Sorguyu, tarihi ve bulguyu `docs/09-web-reddit-field-guide.md` §6'ya kaydet.
 
----
+Kanıt hiyerarşisi: **resmi kaynak > ampirik araştırma > Reddit anekdotu > sentez.**
+Reddit gönderisi prevalans veya nedensellik kanıtı değildir; hipotez üretir.
+Doğrulanamayan bir kaynağı yeni bir kuralın **tek** gerekçesi yapma.
 
-## Her görevde, sırayla
+### 2. Somut proje/ürün adı yazma
 
-```
-1. CLAIM AÇ           görev + dokunacağın path'ler + TTL          → docs/03 §4
-                      claim'siz PR reddedilir.
-                      Path zaten claim'liyse BAŞLAMA — bekle veya böl.
+Rehber generic kalmalı. Profiller **teknoloji** adıyla anılır (`flutter.md`,
+`unity.md`, `backend.md`), ürün adıyla değil. Örnek gerekiyorsa davranış sınıfı
+yaz ("deterministik simülasyon", "store dağıtımı yapılan uygulamalar").
 
-2. GROUNDING          yazmadan önce ARA:                          → docs/04 §7
-                      - search_graph(name_pattern=<niyet>)   aynı isimli var mı
-                      - search_code(<davranış>)              aynı işi yapan var mı
-                      - get_architecture()                   hangi katmana ait
-                      Bulduysan KULLAN veya GENİŞLET, yeniden yazma.
-                      Sonucu PR gövdesine yaz — yoksa PR reddedilir.
+### 3. Dili dürüst tut
 
-3. IMPACT ANALİZİ     dokunacağın sembollerden etkilenen testleri çıkar → docs/04 §5
-                      Fast lane'de yalnız onları koş. PR'a yaz.
-                      (Bu adım regresyonu %70 düşüren mekanizmadır.)
+- Ölçülmemiş bir şeyi ölçülmüş gibi yazma. Benchmark yüzdesini eşik yapma.
+- Bir öneri hedef repoda pilot gerektiriyorsa "pilot önerisi" de, "kural" deme.
+- Bir mekanizmanın sınırını sakla­ma (ölçüldüğü model, örneklem, tarih).
 
-4. AC'yi OKU          approved: true mu? Değilse BAŞLAMA.         → docs/05 §3.2
-                      Kapsam dışı bölümünü oku — kapsamı kendin genişletme.
+### 4. Kısa tut
 
-5. YAZ                sahipliğin olan path'lerde, kendi worktree'nde → docs/03 §1–2
-                      Değiştirdiğin davranışın eskisini SİL.        → docs/04 §6
+Bu repo bir kez fazla büyüdü ve kullanılamaz hale geldi. Yeni bölüm eklemek
+yerine mevcut bölümü keskinleştir. Uzun kural dosyası okunmaz.
 
-6. FAST LANE          lokalde yeşil olmadan push etme (< 3 dk)     → docs/06 §1
+### 5. Değiştirme
 
-7. PR AÇ              iki commit: test-only (A) + impl (B)         → docs/06 §2
-                      CI kırmızı kanıtını KENDİSİ üretir; sen log üretmezsin.
-```
+- Bu dosya (`AGENTS.md`) ve `README.md`'nin "Buradan başla" bölümü — giriş
+  noktası, sahibi insan.
+- Geçmişteki kaynak kayıtlarını silme; yanlışsa düzeltme notu ekle.
 
----
+## Doğrulama
 
-## Pazarlıksız yasaklar
+Kod testi veya TDD gerekmez. PR öncesi:
 
-| ❌ | Referans |
-|---|---|
-| `tests/acceptance/**`, `tests/regression/**`, `tests/hidden/**`, `contracts/**` yazmak | `docs/02` §4.1–4.2 |
-| Kilitli bir testi "düzeltmek" — 2. girişim spec gaming sinyalidir, durdurulur | `docs/05` §4 tahkim |
-| Test değişikliğini üretim koduyla aynı PR'a koymak | `docs/02` §4.9 |
-| `main`'e doğrudan push · force-push · history rewrite | `docs/06` §5.1 |
-| Production erişimi · secret okuma/log'lama | `docs/06` §5.1 |
-| `CODEOWNERS`, `ownership-map.yml`, `.github/workflows/**`, `AGENTS.md`, `.claude/**` değiştirmek | `docs/05` §5 |
-| Lockfile · migration · generated kodu feature PR'ında commit etmek | `docs/03` §6 |
-| Bağımlılık eklemek (`agent:deps` değilsen) | `docs/04` §4.1 |
-| Sahipliğin olmayan path'e yazmak — istek aç | `docs/03` §1 |
-| Aynı Unity sahnesinde başka açık PR varken çalışmak | `profiles/unity.md` §2 |
-| Kapsamı kendi başına genişletmek veya küçültmek | `docs/06` §6.3 |
-
----
-
-## Takıldığında — DUR ve escalate et
-
-| Koşul | Eşik |
-|---|---|
-| Aynı fast lane hatası tekrar ediyor | 3 deneme |
-| Toplam iterasyon | 10 |
-| Süre / lease TTL | 4 saat |
-| Aynı testi 2. kez düzeltmeye kalkışmak | 2 → spec gaming sinyali |
-| Gizli set kırıldı | 1 → kendi başına düzeltmeyi DENEME, insana git |
-| Claim çakışması | 1 |
-| Kapsam dışına çıkma gereği | 1 |
-
-Escalation formatı (`docs/06` §6.2) — **kısmi başarı beyan etme:**
-
-```
-- Hangi AC / görev
-- NE BİTTİ      → CI çıktısına referansla, kendi beyanınla değil
-- NE BİTMEDİ    → açıkça, telafi cümlesi olmadan
-- Neden takıldın → son hata çıktısı
-- Ne denedin
-- Ne bıraktın   → branch, claim durumu, geri alınabilir mi
+```bash
+# yerel linkler sağlam mı
+grep -roE '\]\([^)h][^)]*\)' --include='*.md' . | head -50   # gözle kontrol
+python3 tools/criteria_coverage.py                            # varsa yeşil kalsın
+git diff --check                                              # whitespace
 ```
 
-> **Temel kural:** Senin "bitti/geçti" demen ile CI'ın yeşil olması **iki farklı olaydır.**
-> Yalnız ikincisi sayılır. Hiçbir gate senin beyanınla geçilmez — ajan raporu kanıt değildir
-> (`docs/06` §5.3).
+Kontrol listesi:
+
+- [ ] Kaynak linki, desteklediği cümlenin yanında mı?
+- [ ] Reddit bulgusu "anekdot/saha sinyali" diye etiketli mi?
+- [ ] Paper sonucu model + örneklem + tarih bağlamıyla mı yazılı?
+- [ ] Somut proje/ürün adı geçmiyor mu?
+- [ ] Yeni bir kural eklediysen, gerekçesi ve sınırı yazılı mı?

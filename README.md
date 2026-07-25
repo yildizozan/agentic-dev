@@ -1,17 +1,36 @@
-# Agentic Development — Araştırma Destekli Saha Rehberi
+# Agentic Development — Saha Rehberi
 
-Bu repo, tek ve çok ajanlı yazılım geliştirme süreçlerini daha güvenli,
-denetlenebilir ve sürdürülebilir kurmak için hazırlanmış bir **Markdown
-rehberidir**.
+Ajanlarla (Claude Code, Codex, Cursor…) yazılım geliştirirken kodun tamamı
+okunmuyor, codebase zamanla kopuyor ve birden fazla ajan birbirinin işini
+bozuyor. Bu repo bunun için **ne yapacağını** anlatır.
 
-> Bu repo bir framework, policy motoru veya örnek uygulama değildir. Kendi
-> doğruluğunu TDD, self-CI ya da makine-okunur gate'lerle kanıtlamaya çalışmaz.
-> Buradaki ürün; kaynakları açık, sınırlılıkları dürüst ve hedef repoya
-> uyarlanabilir rehber içeriğidir.
+## 👉 Buradan başla
 
-Son araştırma güncellemesi: **2026-07-25**
+**Projendeki ajanlara ne söyleyeceğini arıyorsan** → **[`templates/AGENTS.md`](templates/AGENTS.md)**
 
-Başlangıç noktası: [Web + Reddit Saha Rehberi](docs/09-web-reddit-field-guide.md)
+Kopyala-yapıştır tek dosya. Kendi projenin köküne `AGENTS.md` olarak koy,
+`<...>` yerlerini doldur, bitti. Başka hiçbir şey okumana gerek yok.
+
+```
+Seviye 1  → tek ajanla çalışıyorsan (7 kural, ~40 satır). Bununla başla.
+Seviye 2  → birden fazla ajan aynı repoda çalışıyorsa (sahiplik, worktree, merge)
+```
+
+Gerisi **neden** bölümü. Bir kuralın gerekçesini, kanıtını veya ölçümünü merak
+ettiğinde `docs/` altına gel — `AGENTS.md` yazmak için gerekmez.
+
+<details>
+<summary>Bu repo ne <b>değil</b>?</summary>
+
+Framework, policy motoru veya çalıştırılacak bir uygulama değil. Ürün; kaynakları
+açık, sınırlılıkları dürüst ve kendi repona uyarlanabilir **rehber içeriği**.
+Kurulacak bir şey yok; kopyalanacak şablonlar ve okunacak gerekçeler var.
+
+Son araştırma güncellemesi: **2026-07-25** ·
+yöntem: [Web + Reddit Saha Rehberi](docs/09-web-reddit-field-guide.md)
+</details>
+
+---
 
 ## Ne problemi çözüyor?
 
@@ -29,19 +48,36 @@ kendisinde aynı altyapıların kurulması zorunlu değildir.
 
 ## Rehberi nasıl kullanırsın?
 
-1. [Araştırma bulguları](docs/01-research.md) ile kanıt sınırlarını oku.
-2. İhtiyacına göre sadakat, eşzamanlılık veya bütünlük bölümüne git.
-3. [Roller](docs/05-roles.md), [operasyon](docs/06-operations.md) ve
+**Kısa yol (çoğu kişi buraya kadar):**
+
+1. [`templates/AGENTS.md`](templates/AGENTS.md)'i kopyala, doldur, projenin köküne koy.
+2. Bir hafta kullan. Üç şeyi say: ajan kapalı test dizinine dokunmaya çalıştı mı,
+   "bitti" deyip bitirmedi mi, iki ajan aynı dosyada çakıştı mı.
+3. Sorun çıkan maddeyi derinleştir — aşağıdaki uzun yol.
+
+**Uzun yol (bir kuralın nedenini veya ölçümünü arıyorsan):**
+
+4. İhtiyacına göre sadakat, eşzamanlılık veya bütünlük bölümüne git (yukarıdaki tablo).
+5. [Roller](docs/05-roles.md), [operasyon](docs/06-operations.md) ve
    [metrikler](docs/07-metrics.md) ile öneriyi kendi organizasyonuna uyarla.
-4. [Pilot planı](docs/08-pilot.md) ile küçük bir deneme yap; evrensel eşik
+6. [Pilot planı](docs/08-pilot.md) ile küçük bir deneme yap; evrensel eşik
    kopyalamak yerine kendi baseline'ını ölç.
-5. Yeni karar verirken [web + Reddit araştırma yöntemini](docs/09-web-reddit-field-guide.md)
-   uygula.
+7. Rehbere katkı yapacaksan [web + Reddit araştırma yöntemini](docs/09-web-reddit-field-guide.md)
+   uygula. [Kanıt sınırları](docs/01-research.md) burada.
 
 ## Repo haritası
 
 ```text
-docs/
+templates/
+  AGENTS.md                 ★ ARADIĞIN ŞEY BU — kopyala-yapıştır, tek dosya
+  TESTING.md                  test taksonomisi (ajana test kuralı vermek istersen)
+  CODEOWNERS.example          sahiplik/review
+  gitattributes.example       çakışan dosya merge politikası
+  ownership-map.yml           çok ajanlı sahiplik haritası
+  acceptance-criteria.md      kabul kriteri şablonu
+  adr.md · spec-change.md     karar kaydı · spec değişimi
+
+docs/                       ← "neden" bölümü, AGENTS.md yazmak için gerekmez
   01-research.md              araştırma bulguları ve kaynak sınırları
   02-spec-fidelity.md         spec, oracle ve test-gaming riskleri
   03-concurrency.md           ownership, worktree, lease ve merge queue
@@ -53,11 +89,14 @@ docs/
   09-web-reddit-field-guide.md
                               dış bulgu → sınırlılık → rehber kararı
 
-profiles/                     backend, Flutter ve Unity eşlemeleri
-templates/                    hedef repoya uyarlanabilecek örnek belgeler/config
-ci/, tools/, specs/, tests/   opsiyonel tarihsel/hedef-repo örnekleri
-AGENTS.md                     korumalı ajan giriş noktası; README haritasına yönlendirir
+profiles/                   stack eşlemeleri: backend · Flutter · Unity
+ci/, tools/, specs/, tests/ hedef repo örnekleri (bu repoda kurulu değil)
+AGENTS.md                   bu REHBERE katkı yapan ajanlar için
+                            (projendeki ajanlar için olan → templates/AGENTS.md)
 ```
+
+> `AGENTS.md` ile `templates/AGENTS.md` karıştırılmasın: ilki bu rehber
+> repo'sunda çalışan ajanı, ikincisi **senin projendeki** ajanı yönetir.
 
 `profiles/`, `templates/`, `ci/`, `tools/`, `specs/` ve `tests/` altındaki
 artefaktlar “bu repoda kurulması gereken mimari” değildir. Bunlar yalnız hedef
