@@ -102,8 +102,7 @@ Kaynak: [Profiles](https://hermes-agent.nousresearch.com/docs/user-guide/profile
 
 ## Rol başına profil önerisi
 
-Bu rehberin rol ayrımı ([`../docs/05-roles.md`](../docs/05-roles.md)) Hermes
-profillerine doğrudan oturur. Kritik olan: **kodu yazan ajan, geçeceği kabul
+Rol ayrımı Hermes profillerine doğrudan oturur. Kritik olan: **kodu yazan ajan, geçeceği kabul
 testini yazmasın.** Ayrı profil = ayrı context = ayrı `SOUL.md`.
 
 | Profil | `SOUL.md` eğilimi | Neden ayrı |
@@ -115,8 +114,7 @@ testini yazmasın.** Ayrı profil = ayrı context = ayrı `SOUL.md`.
 | `security` | Kırmızı çizgi bekçisi | Riski kabul kararını vermez |
 | `product-designer` | Tasarım sözleşmesi sahibi | Fonksiyonel doğrulama yazmaz |
 
-Onu da [`profiles/`](profiles/) altında hazır ve
-[`../docs/05-roles.md`](../docs/05-roles.md) §1 sorumluluk matrisiyle hizalı.
+Onu da [`profiles/`](profiles/) altında hazır.
 
 ---
 

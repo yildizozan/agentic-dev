@@ -1,63 +1,58 @@
 # AGENTS.md
 
-> ⚠ **Bu dosya bu rehber repo'sunda çalışan ajan içindir** — yani rehber
-> içeriğini düzenleyen ajan.
+> Bu dosya **bu repoda** çalışan ajan içindir.
 >
 > **Kendi projendeki/profilindeki ajanlara kural arıyorsan bu dosya değil:**
-> - Proje kuralı (`AGENTS.md`) → **[`harness/AGENTS.template.md`](harness/AGENTS.template.md)**
-> - Hermes profil kimliği (`SOUL.md`) → **[`hermes/SOUL.template.md`](hermes/SOUL.template.md)**
-
----
+> - Proje kuralı (`AGENTS.md`) → [`harness/AGENTS.template.md`](harness/AGENTS.template.md)
+> - Hermes profil kimliği (`SOUL.md`) → [`hermes/profiles/`](hermes/profiles/)
 
 ## Bu repo nedir
 
-Ajanlarla yazılım geliştirme için bir **Markdown rehberi**. Kod ürünü yok,
-kurulacak bir şey yok. Ürün: kaynakları izlenebilir, sınırlılıkları dürüst içerik.
+İki şablon barındırır, başka bir şey değil:
 
-## Rehbere katkı yaparken
+```
+harness/AGENTS.template.md    proje kapsamlı kurallar (doldurulacak)
+hermes/profiles/<rol>/SOUL.md ajan kapsamlı kimlik (hazır, 10 rol)
+```
 
-### 1. Araştırmadan yazma
+Kod yok, framework yok, kurulacak bir şey yok.
 
-Herhangi bir anlamlı içerik değişikliğinden önce:
+## Kurallar
 
-1. **Resmi/primary kaynak** ara (vendor dokümanı, paper, araç dokümanı).
-2. **Aynı konuyu Reddit'te** ara — çözüm kopyalamak için değil, gerçek failure
-   mode ve ergonomi riskini görmek için.
-3. Sorguyu, tarihi ve bulguyu `docs/09-web-reddit-field-guide.md` §6'ya kaydet.
+**1. Kısa tut.** Bu repo bir kez fazla büyüdü ve kullanılamaz hale geldi.
+Yeni dosya veya bölüm eklemek yerine mevcudu keskinleştir. Uzun kural dosyası
+okunmaz — ajan 40 satırı uygular, 400 satırı görmezden gelir.
 
-Kanıt hiyerarşisi: **resmi kaynak > ampirik araştırma > Reddit anekdotu > sentez.**
-Reddit gönderisi prevalans veya nedensellik kanıtı değildir; hipotez üretir.
-Doğrulanamayan bir kaynağı yeni bir kuralın **tek** gerekçesi yapma.
+**2. Kapsam dışına çıkma.** Bu repo şablon barındırır. Doküman katmanı, araç,
+CI, test, stack rehberi eklemek **kapsam dışıdır**. Gerekiyorsa önce sor.
 
-### 2. Somut proje/ürün adı yazma
+**3. Somut ürün/proje adı yazma.** Şablonlar generic kalmalı. Örnek gerekiyorsa
+davranış sınıfı yaz, proje adı değil.
 
-Rehber generic kalmalı. Profiller **teknoloji** adıyla anılır (`flutter.md`,
-`unity.md`, `backend.md`), ürün adıyla değil. Örnek gerekiyorsa davranış sınıfı
-yaz ("deterministik simülasyon", "store dağıtımı yapılan uygulamalar").
+**4. `SOUL.md` ile `AGENTS.md` sınırını koru.**
 
-### 3. Dili dürüst tut
+| `SOUL.md`'ye | `AGENTS.md`'ye |
+|---|---|
+| Ses, ton, doğrudanlık | Komut, path, port |
+| Kararsızlık / itiraz davranışı | Dizin yasakları |
+| Kanıt ve tamamlanma disiplini | Framework, iş akışı |
+| Rolün sınırı — neye karışmadığı | Projeye özgü her şey |
 
-- Ölçülmemiş bir şeyi ölçülmüş gibi yazma. Benchmark yüzdesini eşik yapma.
-- Bir öneri hedef repoda pilot gerektiriyorsa "pilot önerisi" de, "kural" deme.
-- Bir mekanizmanın sınırını sakla­ma (ölçüldüğü model, örneklem, tarih).
+Karar veremiyorsan sor: *"bu kural yarın başka bir projede de geçerli mi?"*
+Evetse `SOUL.md`, hayırsa `AGENTS.md`.
 
-### 4. Kısa tut
+**5. Araştırmadan yazma.** Bir iddia ekleyeceksen önce resmi/primary kaynağa bak,
+sonra aynı konuyu Reddit'te ara. Kaynağı satırın yanına koy. Reddit anekdotunu
+yaygınlık kanıtı sayma. Resmi doküman bir aracın nasıl davrandığını söyler;
+senin ortamında kurulu olduğunu söylemez.
 
-Bu repo bir kez fazla büyüdü ve kullanılamaz hale geldi. Yeni bölüm eklemek
-yerine mevcut bölümü keskinleştir. Uzun kural dosyası okunmaz.
+**6. Bu dosyayı ve `README.md`'nin giriş tablosunu değiştirme.** Giriş noktası,
+sahibi insan.
 
-### 5. Değiştirme
-
-- Bu dosya (`AGENTS.md`) ve `README.md`'nin "Buradan başla" bölümü — giriş
-  noktası, sahibi insan.
-- Geçmişteki kaynak kayıtlarını silme; yanlışsa düzeltme notu ekle.
-
-## Doğrulama
-
-Bu repo Markdown üretir; kod testi veya TDD gerekmez. PR öncesi:
+## PR öncesi
 
 ```bash
-# 1. yerel markdown linkleri gerçekten var mı  (kod bloklarını atlar)
+# yerel markdown linkleri gerçekten var mı
 python3 - <<'EOF'
 import re, pathlib
 fence, link = re.compile(r"^\s*```"), re.compile(r"\]\((?!https?:|#)([^)]+)\)")
@@ -73,17 +68,10 @@ for f in pathlib.Path(".").rglob("*.md"):
                 print(f"KIRIK {f}:{n} -> {m.group(1)}")
 EOF
 
-# 2. whitespace
 git diff --check
-
-# 3. proje adı yasağı (madde 2) — deny-list'i kendin doldur, repoya yazma
-grep -rniE 'yasakli-ad-1|yasakli-ad-2' --include='*.md' . && echo IHLAL
 ```
 
-Kontrol listesi:
-
-- [ ] Kaynak linki, desteklediği cümlenin yanında mı?
-- [ ] Reddit bulgusu "anekdot/saha sinyali" diye etiketli mi?
-- [ ] Paper sonucu model + örneklem + tarih bağlamıyla mı yazılı?
-- [ ] Somut proje/ürün adı geçmiyor mu?
-- [ ] Yeni bir kural eklediysen, gerekçesi ve sınırı yazılı mı?
+- [ ] Yeni dosya/dizin eklemedim (eklediysem sordum)
+- [ ] Somut ürün/proje adı geçmiyor
+- [ ] `SOUL.md`'ye proje kuralı sızmadı
+- [ ] Kaynak linki desteklediği cümlenin yanında

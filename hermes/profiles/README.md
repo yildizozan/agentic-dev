@@ -3,8 +3,7 @@
 Her dizin bir Hermes profiline karşılık gelir ve içinde **doldurulmuş, hazır bir
 `SOUL.md`** vardır. Placeholder yok — kopyala ve kullan.
 
-Roller [`../../docs/05-roles.md`](../../docs/05-roles.md) §1'deki sorumluluk
-matrisiyle hizalıdır.
+Her profilin `SOUL.md`'sinde rolün **sınırı** da yazılı — neye karışmadığı.
 
 | Profil | Rol | Sınırı (`SOUL.md`'de yazılı) |
 |---|---|---|

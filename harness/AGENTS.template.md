@@ -148,5 +148,4 @@ Bu üçü iyiyse dosya işini yapıyor. Değilse **eksik olan maddeyi** ekle —
 
 ---
 
-Bu dosyanın arkasındaki gerekçe, kanıt ve ölçüm detayı `docs/` altında.
-Oraya **sadece bir kuralın nedenini** merak ettiğinde git; `AGENTS.md` yazmak için gerekmez.
+Hermes profil kimliği (`SOUL.md`) tarafı için: [`../hermes/profiles/`](../hermes/profiles/)
