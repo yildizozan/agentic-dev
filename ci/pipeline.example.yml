@@ -1,0 +1,224 @@
+# GitHub Actions referans pipeline — docs/06-operations.md §1
+#
+# Üç şerit:
+#   FAST LANE   (< 3 dk)   ajan her push'ta görür       → hız birinci kısıt
+#   MERGE LANE  (< 12 dk)  PR review-ready olduğunda
+#   MERGE QUEUE            gizli set + E2E; AJAN LOG'A ERİŞEMEZ
+#   NIGHTLY                trend, gate değil
+#
+# ⚠ Bu bir iskelet. `<...>` yerlerini kendi komutlarınla değiştir.
+
+name: pipeline
+
+on:
+  push:
+    branches: ["agent/**", "feat/**", "fix/**"]
+  pull_request:
+    branches: [main]
+  merge_group:            # ← merge queue şeridi (docs/03 §5). Bu blok olmadan kurulum eksik.
+  schedule:
+    - cron: "0 3 * * *"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ════════════════════════════════════════════════════════════════
+  # FAST LANE — hedef < 3 dk. Ajanın döngü hızı buna bağlı.
+  # ════════════════════════════════════════════════════════════════
+  fast-lane:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6          # aşımda bu bir İŞ'tir, tolerans değil
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      # 1. Statik kapılar  (docs/02 §3.3)
+      - name: Tip + lint + derleme
+        run: <npm run typecheck && npm run lint && npm run build>
+
+      # 2. Architecture fitness functions  (docs/04 §2)
+      #    Uyarı değil HATA. İhlal gerekiyorsa ADR + allowlist.
+      - name: Architecture fitness
+        run: <npx depcruise --config .dependency-cruiser.js src>
+
+      # 3. Secret scan (yalnız diff)
+      - name: Secret scan
+        run: <gitleaks protect --staged --redact>
+
+      # 4. Sahiplik ihlali kontrolü  (docs/03 §1)
+      #    CODEOWNERS yazmayı engellemez — bu adım engeller.
+      - name: Ownership gate
+        run: <tools/check_ownership.sh "${{ github.actor }}">
+
+      # 5. Claim kontrolü  (docs/03 §4.2) — claim'siz PR reddedilir
+      - name: Claim gate
+        if: github.event_name == 'pull_request'
+        run: <tools/check_claim.sh "${{ github.head_ref }}">
+
+      # 6. Criteria coverage  (docs/02 §2.1) — ÇALIŞIR HALDE
+      - name: Criteria coverage
+        run: python3 tools/criteria_coverage.py --format markdown --out /tmp/cc.md
+
+      - name: Criteria coverage raporunu PR'a yaz
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: criteria-coverage
+          path: /tmp/cc.md
+
+      # 7. IMPACT-SEÇİLMİŞ testler — tam suite DEĞİL  (docs/04 §5)
+      #    %70 regresyon düşüşünün mekanizması + fast lane'i 3 dk'da tutan şey
+      - name: Etkilenen testler
+        run: <npx jest --findRelatedTests $(git diff --name-only origin/main...HEAD)>
+
+  # ════════════════════════════════════════════════════════════════
+  # MERGE LANE — hedef < 12 dk
+  # ════════════════════════════════════════════════════════════════
+  merge-lane:
+    if: github.event_name == 'pull_request'
+    needs: fast-lane
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Tam unit + property suite
+        run: <npm run test:unit && npm run test:property>
+
+      - name: Integration (Testcontainers)
+        run: <npm run test:integration>
+
+      - name: Acceptance / BDD (görünür set)
+        run: <npm run test:acceptance>
+
+      # Breaking change → G3 insan onayı  (docs/05 §3.2)
+      - name: Contract diff
+        run: <oasdiff breaking origin/main:contracts/api.yaml contracts/api.yaml>
+
+      - name: SAST (değişen dosyalar)
+        run: <semgrep ci>
+
+      # Incremental mutation — YALNIZ DIFF. Gate olabilmesinin sebebi bu.
+      # (docs/02 §4.4: v1.0'ın "haftalık job merge'i gate'ler" çelişkisinin çözümü)
+      - name: Incremental mutation
+        run: <npx stryker run --incremental --mutate "$(git diff --name-only origin/main...HEAD | paste -sd,)">
+
+      - name: Diff coverage >= %85
+        run: <npx diff-cover coverage/lcov.info --compare-branch=origin/main --fail-under=85>
+
+      - name: Duplikasyon (yalnız diff'in getirdiği)  # docs/04 §3
+        run: <npx jscpd --gitignore --threshold 3 $(git diff --name-only origin/main...HEAD)>
+
+      - name: Public API surface diff                 # docs/04 §4.2
+        run: <npm run api:extract && git diff --exit-code api/surface.md>
+
+      - name: Risk sınıflandırma → G2 gerekli mi      # docs/05 §3.3
+        run: <tools/classify_risk.sh>   # 🔴 varsa "human-review-required" label'ı ekler
+
+  # ════════════════════════════════════════════════════════════════
+  # KIRMIZI KANITI — CI ÜRETİR, AJAN ÜRETMEZ  (docs/06 §2)
+  # Ajanın ürettiği log kanıt değildir: "fabricated success reports"
+  # ölçülmüş bir ajan hata modudur (arXiv 2605.30777).
+  # ════════════════════════════════════════════════════════════════
+  red-proof:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Test-only commit'i bul
+        id: split
+        run: |
+          # Konvansiyon: test-only commit mesajı "test(AC-###):" ile başlar
+          SHA=$(git log origin/main..HEAD --format='%H %s' \
+                | awk '$2 ~ /^test\(/ {print $1; exit}')
+          if [ -z "$SHA" ]; then
+            echo "::error::test-only commit bulunamadi. PR yapisi: commit A (yalniz test) + commit B (impl). docs/06 §2"
+            exit 1
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Testler test-only commit'te KIRMIZI olmali
+        run: |
+          git checkout ${{ steps.split.outputs.sha }}
+          if <npm run test:changed>; then
+            echo "::error::Yeni test bastan YESIL cikti. Test hicbir sey dogrulamiyor \
+              ya da davranis zaten vardi. docs/06 §2 adim 3."
+            exit 1
+          fi
+          echo "OK: test implementasyondan once kirmizi kostu."
+
+      - name: Testler HEAD'de YEŞİL olmali
+        run: |
+          git checkout ${{ github.event.pull_request.head.sha }}
+          <npm run test:changed>
+
+  # ════════════════════════════════════════════════════════════════
+  # MERGE QUEUE — gizli set + E2E.
+  # ⚠ Ajan bu job'un log'una ERİŞEMEZ (docs/02 §4.3 madde 4).
+  # ════════════════════════════════════════════════════════════════
+  merge-queue:
+    if: github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gizli test setini çek
+        run: <git clone --depth 1 https://x-access-token:${{ secrets.HIDDEN_TESTS_TOKEN }}@github.com/<org>/<repo>-hidden.git .hidden>
+
+      # ⚠ SIZDIRMAYAN RAPOR (docs/02 §4.3 madde 2) — bu blok kritik.
+      # Assertion içeriği, dosya adı, satır no ve diff LOGLANMAZ.
+      # Aksi halde ajan log'dan testi tersine mühendislikle çıkarır ve
+      # gizli setin tüm amacı kaybolur.
+      - name: Gizli set (sızdırmayan)
+        run: |
+          set +e
+          <npm run test:hidden> > /tmp/hidden.log 2>&1
+          CODE=$?
+          set -e
+          if [ $CODE -ne 0 ]; then
+            # SADECE AC ID'leri sızdırılır — başka hiçbir şey.
+            grep -oE 'AC-[0-9]{3,}' /tmp/hidden.log | sort -u \
+              | sed 's/^/Gizli sette basarisiz: /' || true
+            echo "::error::Gizli set basarisiz. Insan incelemesi gerekiyor (docs/05 §4 tahkim)."
+            rm -f /tmp/hidden.log     # ham log artefakt olarak YÜKLENMEZ
+            exit 1
+          fi
+          rm -f /tmp/hidden.log
+
+      - name: E2E kritik yolculuklar (max 10)
+        run: <npx playwright test --grep @critical>
+
+  # ════════════════════════════════════════════════════════════════
+  # NIGHTLY — trend, gate DEĞİL  (docs/06 §1.2)
+  # ════════════════════════════════════════════════════════════════
+  nightly:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    continue-on-error: true       # trend job'u main'i kırmaz
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tam mutation suite
+        run: <npx stryker run>
+      - name: DAST
+        run: <zap-baseline.py -t $STAGING_URL>
+      - name: Perf bütçesi
+        run: <k6 run perf/budget.js>
+      - name: Ölü kod trendi
+        run: <npx knip --reporter markdown>
+      - name: Bağımlılık CVE
+        run: <osv-scanner -r .>
+      - name: Flake taraması            # docs/06 §3
+        run: <npm run test:unit -- --repeat 3>

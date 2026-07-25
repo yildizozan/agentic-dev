@@ -1,0 +1,66 @@
+# .gitattributes — docs/03-concurrency.md §6
+# Yüksek çekişmeli dosyaların merge davranışını belirler.
+# Politika olmadan bu dosyalar ajan çakışmalarının çoğunluğunu üretir.
+
+# ---- Generated kod: commit edilmek ZORUNDAYSA ----
+# Tercih: hiç commit etmemek (CI'da dondurulmuş contract'tan üret).
+# Zorunluysa: diff'ten gizle + review yükünden çıkar + tek sahip.
+generated/**            linguist-generated=true -diff
+*.g.dart                linguist-generated=true -diff
+*.freezed.dart          linguist-generated=true -diff
+*.pb.go                 linguist-generated=true -diff
+*_pb2.py                linguist-generated=true -diff
+
+# ---- Lockfile: feature PR'ında commit edilmez (docs/03 §6) ----
+# merge=ours = çakışmada bizim tarafı tut; lockfile merge queue'da yeniden üretilir.
+# ⚠ `merge=ours` driver'ı kurulmalı:  git config merge.ours.driver true
+package-lock.json       merge=ours -diff
+yarn.lock               merge=ours -diff
+pnpm-lock.yaml          merge=ours -diff
+pubspec.lock            merge=ours -diff
+Podfile.lock            merge=ours -diff
+Cargo.lock              merge=ours -diff
+poetry.lock             merge=ours -diff
+
+# ---- Append-only registry / i18n: union merge ----
+# Şart: satır başına tek kayıt + alfabetik sıra. Aksi halde union bozuk çıktı üretir.
+# Öncelikli çözüm manuel registry'yi kaldırıp auto-discovery kullanmaktır.
+**/i18n/*.properties    merge=union
+**/locales/*.csv        merge=union
+CHANGELOG.md            merge=union
+.gitignore              merge=union
+
+# ---- Unity: en kritik bölüm (docs/03 §6) ----
+# ZORUNLU ön koşul: Editor > Project Settings > Editor > Asset Serialization
+#                   = Force Text  (aksi halde binary, hiç merge edilemez)
+#
+# UnityYAMLMerge kurulumu (mergespecfile.txt Unity ile gelir):
+#   git config merge.unityyamlmerge.name "Unity SmartMerge"
+#   git config merge.unityyamlmerge.driver \
+#     '"/Applications/Unity/Hub/Editor/<sürüm>/Unity.app/Contents/Tools/UnityYAMLMerge" \
+#      merge -p %O %A %B %A'
+#
+# ⚠ SmartMerge bile semantik çakışmayı çözmez. Asıl kontrol exclusive lease'dir:
+#    aynı sahneye iki açık PR YASAK.
+*.unity                 merge=unityyamlmerge eol=lf
+*.prefab                merge=unityyamlmerge eol=lf
+*.asset                 merge=unityyamlmerge eol=lf
+*.controller            merge=unityyamlmerge eol=lf
+*.anim                  merge=unityyamlmerge eol=lf
+*.mat                   merge=unityyamlmerge eol=lf
+
+# .meta: daima asset'iyle aynı commit'te. Feature PR'ında asset taşıma YASAK.
+*.meta                  merge=unityyamlmerge eol=lf
+
+# Unity binary asset'leri — LFS
+*.psd                   filter=lfs diff=lfs merge=lfs -text
+*.fbx                   filter=lfs diff=lfs merge=lfs -text
+*.wav                   filter=lfs diff=lfs merge=lfs -text
+*.mp4                   filter=lfs diff=lfs merge=lfs -text
+
+# ---- Xcode / Gradle: merge kâbusu, tek sahip + ayrı PR ----
+*.pbxproj               merge=union -diff
+*.xcworkspacedata       -diff
+
+# ---- Gizli test seti: diff'te görünmesin (docs/02 §4.3) ----
+tests/hidden/**         -diff
