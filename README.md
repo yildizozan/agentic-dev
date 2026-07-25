@@ -16,7 +16,7 @@ Repo iki kola ayrılır. Ne yazdığına göre birini seç:
 | Nereye koyulur | Proje kökü | `~/.hermes/profiles/<ad>/SOUL.md` |
 | Ortam | Claude Code · Codex · Cursor · **Hermes** | Hermes |
 | Şablon | **[`harness/AGENTS.template.md`](harness/AGENTS.template.md)** | **[`hermes/SOUL.template.md`](hermes/SOUL.template.md)** |
-| Hazır dosya | — (proje bazlı doldurman gerekir) | **[`hermes/profiles/`](hermes/profiles/)** — dev · qa · review · research |
+| Hazır dosya | — (proje bazlı doldurman gerekir) | **[`hermes/profiles/`](hermes/profiles/)** — 10 rol profili, doldurulmuş |
 
 İkisi de kopyala-yapıştır, tek başına çalışır — başka hiçbir dosyayı okumana
 gerek yok. Hermes profilleri **doldurulmuş** geliyor; `AGENTS.md` projene özgü
@@ -92,11 +92,17 @@ harness/                    ★ AGENTS.md yazacaksan — proje kapsamlı kuralla
 
 hermes/                     ★ SOUL.md yazacaksan — ajan kapsamlı kimlik
   README.md                   profil yapısı, komutlar, SOUL vs AGENTS ayrımı
-  profiles/                   HAZIR profiller (placeholder yok, kopyala-kullan)
-    dev/SOUL.md                 inşa eden — buradan başla
-    qa/SOUL.md                  doğrulayan
-    review/SOUL.md              inceleyen (farklı model ata)
-    research/SOUL.md            araştıran
+  profiles/                   HAZIR rol profilleri (placeholder yok, kopyala-kullan)
+    project-manager/            PM · lead · owner · producer
+    tech-lead/                  sözleşme + inceleme (farklı model ata)
+    engineer-backend/           ┐
+    engineer-frontend/          │ disiplin başına ayrı profil
+    engineer-mobile/            │
+    engineer-ui-ux/             │
+    engineer-unity/             ┘
+    qa/                         doğrulayan
+    security/                   kırmızı çizgiler
+    product-designer/           tasarım sözleşmesi
   SOUL.template.md            sıfırdan yazacaksan
 
 templates/                  opsiyonel proje artefaktları

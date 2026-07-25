@@ -75,9 +75,19 @@ Bir şey kullanıcı için değişmiyorsa düzeltip geçerim; tören yapmam.
 
 ---
 
+## Hazır rol profilleri
+
+Sıfırdan yazmak istemiyorsan **10 rol için doldurulmuş `SOUL.md`** zaten var:
+[`profiles/`](profiles/) — PM · tech-lead · engineer-backend/frontend/mobile/ui-ux/unity ·
+qa · security · product-designer.
+
+Aşağıdaki varyantlar, kendi rolünü sıfırdan kurarken referans olsun diye burada.
+
+---
+
 ## Varyantlar
 
-Rol başına ayrı profil açıyorsan (`hermes profile create qa --clone-from coder`)
+Rol başına ayrı profil açıyorsan (`hermes profile create qa --clone-from <kaynak>`)
 temel şablonun **Ses** ve **Kanıt** bölümlerini koru, aşağıdakini ekle/değiştir.
 
 ### `qa` profili

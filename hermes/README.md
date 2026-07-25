@@ -8,22 +8,29 @@ kararsızlıkta ve itirazda ne yaptığı.
 
 ## 👉 Tek adım
 
-**Hazır profiller** → [`profiles/`](profiles/) — dördü de doldurulmuş, placeholder yok:
+**Hazır rol profilleri** → [`profiles/`](profiles/) — onu da doldurulmuş, placeholder yok:
+
+| Profil | Rol |
+|---|---|
+| [`project-manager`](profiles/project-manager/SOUL.md) | PM · Project Lead · Product Owner · Producer |
+| [`tech-lead`](profiles/tech-lead/SOUL.md) | Tech Lead |
+| [`engineer-backend`](profiles/engineer-backend/SOUL.md) | Backend |
+| [`engineer-frontend`](profiles/engineer-frontend/SOUL.md) | Frontend |
+| [`engineer-mobile`](profiles/engineer-mobile/SOUL.md) | Mobile |
+| [`engineer-ui-ux`](profiles/engineer-ui-ux/SOUL.md) | UI/UX implementation |
+| [`engineer-unity`](profiles/engineer-unity/SOUL.md) | Unity / simülasyon |
+| [`qa`](profiles/qa/SOUL.md) | QA |
+| [`security`](profiles/security/SOUL.md) | Security |
+| [`product-designer`](profiles/product-designer/SOUL.md) | Product Designer |
 
 ```bash
-for p in dev qa review research; do
-  hermes profile create "$p"
-  cp "hermes/profiles/$p/SOUL.md" "$HOME/.hermes/profiles/$p/SOUL.md"
-done
-dev chat
+hermes profile create tech-lead
+cp hermes/profiles/tech-lead/SOUL.md ~/.hermes/profiles/tech-lead/SOUL.md
+tech-lead chat
 ```
 
-| Profil | Rolü |
-|---|---|
-| [`profiles/dev/SOUL.md`](profiles/dev/SOUL.md) | İnşa eden — **buradan başla** |
-| [`profiles/qa/SOUL.md`](profiles/qa/SOUL.md) | Doğrulayan |
-| [`profiles/review/SOUL.md`](profiles/review/SOUL.md) | İnceleyen |
-| [`profiles/research/SOUL.md`](profiles/research/SOUL.md) | Araştıran |
+Hepsini birden kurmak ve yeni disiplin eklemek: [`profiles/README.md`](profiles/README.md)
+İhtiyacın olmayan profili hiç açma.
 
 Sıfırdan yazacaksan: **[`SOUL.template.md`](SOUL.template.md)**
 
@@ -101,13 +108,15 @@ testini yazmasın.** Ayrı profil = ayrı context = ayrı `SOUL.md`.
 
 | Profil | `SOUL.md` eğilimi | Neden ayrı |
 |---|---|---|
-| [`dev`](profiles/dev/SOUL.md) | İnşa eden, kapsamı dar tutan | Ana iş |
-| [`qa`](profiles/qa/SOUL.md) | Şüpheci, kabul kriterinden kontrol üreten | Kendi sınavını yazan ajan hizalanmış değildir |
-| [`review`](profiles/review/SOUL.md) | Karşı çıkmaya eğilimli, **farklı model** | Aynı modelin kendi kodunu review etmesi korelasyonlu hata üretir |
-| [`research`](profiles/research/SOUL.md) | Kaynağı görünür kılan | Kanıt sınıflarını karıştırmamak için |
+| `project-manager` | Kapsamı ve kriteri tanımlayan | Kriteri yazan taraf onu doğrulamaz |
+| `tech-lead` | Sözleşme kuran, adversarial inceleyen | **Farklı model** ata: aynı model kendi çıktısını incelerken aynı kör noktayı iki kez kaçırır |
+| `engineer-*` | İnşa eden (disiplin başına) | Kendi geçeceği kabul kontrolünü yazmaz |
+| `qa` | Şüpheci, kriterden kontrol üreten | Bağımsızlığı için üretim kodu yazmaz |
+| `security` | Kırmızı çizgi bekçisi | Riski kabul kararını vermez |
+| `product-designer` | Tasarım sözleşmesi sahibi | Fonksiyonel doğrulama yazmaz |
 
-Dördü de [`profiles/`](profiles/) altında hazır. `review` için `config.yaml`'da
-`dev`'den **farklı model** ata — sebebi yukarıdaki satırda.
+Onu da [`profiles/`](profiles/) altında hazır ve
+[`../docs/05-roles.md`](../docs/05-roles.md) §1 sorumluluk matrisiyle hizalı.
 
 ---
 
