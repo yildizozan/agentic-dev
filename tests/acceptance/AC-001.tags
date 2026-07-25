@@ -1,0 +1,18 @@
+# Kapsama beyanı — docs/02-spec-fidelity.md §4.6 (kriter izlenebilirliği)
+#
+# NEDEN AYRI DOSYA: test_criteria_coverage.py tarama-dışı işareti taşıyor, çünkü
+# içinde fixture olarak sahte kriter ID'leri üretiyor. O dosya taranmadığı için
+# AC-001 kapsaması buradan beyan edilir.
+#
+# Meta-testlerin genel deseni:
+#   fixture ID'leri barındıran dosya -> tarama-dışı işareti
+#   kapsadığı gerçek kriter          -> bu .tags dosyası
+#
+# Normal testlerde buna gerek yoktur — kriter ID'si doğrudan test adında durur.
+#
+# İKİ TUZAK (ikisi de bu repo kurulurken yaşandı):
+#   1. Bu dosyaya tarama-dışı işaretinin kendisini yazma — beyan da atlanır.
+#   2. Bu dosyada fixture ID'lerini anma — öksüz referans olarak raporlanırlar.
+#      Taranan hiçbir dosyanın yorumunda gerçek olmayan kriter ID'si geçmemeli.
+
+AC-001  tests/acceptance/test_criteria_coverage.py

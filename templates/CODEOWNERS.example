@@ -1,0 +1,53 @@
+# CODEOWNERS — docs/02-spec-fidelity.md §4.2 + docs/03-concurrency.md §1
+#
+# ⚠ ÖNEMLİ SINIRLAMA: CODEOWNERS yalnız REVIEW ister, YAZMAYI ENGELLEMEZ.
+#    Tek başına kurmak yaygın bir hatadır (docs/03 §10 anti-pattern).
+#    Yanına şunlar ZORUNLU:
+#      - branch protection: "Require review from Code Owners" + admin'lere de uygula
+#      - pre-commit hook: yalnız lokal hızlı geri bildirim
+#      - CI gate: sahiplik ihlali → kırmızı
+#      - feature ajanı token'ı: yalnız kendi branch'ine push
+#
+# Solda path, sağda sahip. Son eşleşen satır kazanır — sıra önemli.
+
+# ---- varsayılan ----
+*                               @tech-lead-agent
+
+# ---- spec: PM yazar, İNSAN onaylar ----
+/specs/acceptance-criteria/     @pm-agent @human-product-owner
+
+# ---- testler: kod ajanına KAPALI (docs/02 §4.1) ----
+/tests/acceptance/              @qa-agent
+/tests/regression/              @qa-agent
+/tests/hidden/                  @qa-agent
+
+# ---- contract: Tech Lead; breaking change → insan (G3) ----
+/contracts/                     @tech-lead-agent @human-product-owner
+
+# ---- yüksek çekişmeli tek-sahipli yüzeyler (docs/03 §6) ----
+/db/migrations/                 @migration-agent @human-product-owner
+package-lock.json               @deps-agent
+pubspec.lock                    @deps-agent
+Podfile.lock                    @deps-agent
+/generated/                     @ci-agent
+
+# ---- ajan kendi kısıtlarını/gate'lerini yazamaz (docs/05 §5, docs/06 §5.1) ----
+/.github/workflows/             @tech-lead-agent @human-product-owner
+/CODEOWNERS                     @human-product-owner
+/ownership-map.yml              @tech-lead-agent @human-product-owner
+/AGENTS.md                      @tech-lead-agent @human-product-owner
+/.claude/                       @tech-lead-agent @human-product-owner
+/tools/                         @tech-lead-agent
+
+# ---- risk sınıfı 🔴: insan okuması zorunlu (docs/05 §3.3) ----
+/src/auth/                      @tech-lead-agent @security-agent @human-product-owner
+/src/billing/                   @tech-lead-agent @human-product-owner
+
+# ---- feature domainleri ----
+/src/catalog/                   @backend-agent
+/src/ui/                        @frontend-agent
+/design/tokens/                 @designer-agent @human-designer
+
+# ---- Unity: exclusive lease gerektirir (docs/03 §6) ----
+/Assets/Scenes/                 @unity-integrator-agent
+/Assets/Prefabs/Shared/         @unity-integrator-agent
