@@ -1,17 +1,20 @@
 # 04 — Codebase Bütünlüğü (Drift ve Çürüme Kontrolü)
 
-> **Normatif.** Bu dosya v1.0'da yoktu.
+> **Normatif rehber önerisi.** Hedef repoda hangi maddenin otomatik gate,
+> hangisinin insan kontrolü olduğu ayrıca belgelenmelidir.
 > Kapsam: *"ajanın yazdığı kodu kimse okumuyor, codebase gitgide kopuyor"* probleminin **test dışı** ekseni.
 
 ---
 
 ## 0. Neden test yetmez
 
-`02` davranışsal sadakati garanti eder. Ama:
+`02` davranışsal sadakat için oracle ve izlenebilirlik kurar. Ancak bu kontroller
+yalnız ölçtükleri davranış kapsamı kadar kanıt üretir:
 
 > **Bir ajan test suite'inin %100'ünü geçerken codebase'i çürütebilir.**
 
-Testler *davranışı* doğrular, *yapı* hakkında hiçbir şey söylemez. Ajan şunları yapıp yeşil kalabilir:
+Feature testleri *davranışı* doğrular; mimari yapı hakkında varsayılan olarak
+kanıt üretmez. Ajan şunları yapıp yeşil kalabilir:
 
 | Çürüme modu | Test ne der |
 |---|---|
@@ -48,7 +51,8 @@ Mimariyi prose'dan çıkarıp **çalıştırılabilir kurala** çevirir. `02` §
 
 ### 2.1 Kurallar
 
-Minimum kural seti — her repo bunları tanımlar:
+Her repo kendi mimarisine göre en az şu kural sınıflarını tanımlar; aşağıdaki
+katman isimleri örnektir, evrensel klasör yapısı değildir:
 
 ```
 1. Katman yönü        : domain ← application ← infrastructure ← ui
@@ -117,7 +121,10 @@ Her PR'da dışa açık sembol yüzeyinin diff'i raporlanır (`api_extractor`, `
 
 ### 5.1 Neden birinci sınıf
 
-Ölçülmüş sonuç: kod–test grafı üzerinden ajana **hangi testleri kontrol edeceğini** söylemek regresyonu **%70 düşürüyor** (%6.08 → %1.82, arXiv 2603.17973).
+Tek bir SWE-bench Verified çalışmasında, iki küçük yerel model üzerinde kod–test
+grafıyla **hangi testlerin kontrol edileceğini** göstermek regresyonu `%6.08 →
+%1.82` düşürmüştür. Bu yerel repo için garanti değil, doğrulanacak hipotezdir
+(arXiv 2603.17973).
 
 > **v1.0'ın en büyük operasyonel açığı buydu:** bu bulgu araştırma tablosunda bir satır olarak duruyor, ama ROI sıralamasında, CI akışında ve pilot planında **hiç geçmiyordu.** Dokümanın kendi kaynakçasındaki en kanıtlı şey, kendi eylem planında yoktu.
 >
@@ -134,8 +141,8 @@ ajan değişiklik yapmadan ÖNCE:
   3. Bu listeyi PR gövdesine yaz
   4. Fast lane'de yalnız bu testleri koş   → hem doğruluk hem hız
 
-CI merge lane:
-  5. Tam suite (queue içinde)
+CI merge lane + merge_group:
+  5. Tam suite sentetik birleşik SHA üzerinde
   6. Ajanın çıkardığı liste ile gerçekte kırılan testleri karşılaştır
      → fark, impact grafının kalitesi hakkında metrik
 ```
@@ -154,8 +161,8 @@ CI merge lane:
 |---|---|---|
 | Erişilemez kod | 0 yeni | `knip`, `vulture`, `ts-prune`, Roslyn analyzer |
 | Öksüz test | 0 | Sildiği koda ait test kalmışsa |
-| Dosya boyutu | yeni dosya < 400 satır | Aşımda gerekçe |
-| Fonksiyon karmaşıklığı | cyclomatic < 15 | |
+| Dosya boyutu | baseline sonrası repo bütçesi | Aşımda gerekçe |
+| Fonksiyon karmaşıklığı | baseline sonrası repo bütçesi | Diff'teki artışı önceliklendir |
 | Yeni top-level dizin | onay gerekli | Yapısal karar → ADR |
 
 **Kural:** Ajan bir implementasyonu değiştirdiğinde eskisini **silmek zorundadır.** "İhtiyaten bırakalım" ajan çürümesinin en yaygın biçimidir; bir insan review'ü olmadığı için asla geri dönülüp temizlenmez.
@@ -176,7 +183,8 @@ Yeni bir fonksiyon/servis/util yazmadan önce:
   4. Bulduysan: KULLAN veya GENİŞLET. Yeni yazacaksan PR'da neden yazdığını belirt.
 ```
 
-Bu adım ajanın system prompt'una / skill dosyasına girer, "iyi olur" tavsiyesi olarak değil **çıktı şartı** olarak: PR gövdesinde grounding sorgusu sonucu yoksa PR reddedilir.
+Bu adım ajanın system prompt'una / skill dosyasına girer. PR gövdesi kontrolü
+uygulanmadığı sürece `manual`dır; CI gerçekten doğrulamıyorsa “reddedilir” denmez.
 
 > Gerekçe: rehbersiz ajan repodaki baskın deseni kopyalar ([`01` §1.1](01-research.md)). Aramadığı için var olanı görmez; görmediği için yeniden yazar. Bu, codebase'den kopmanın birincil mekanizmasıdır.
 
@@ -186,7 +194,8 @@ Bu adım ajanın system prompt'una / skill dosyasına girer, "iyi olur" tavsiyes
 
 Yapısal karar veren her değişiklik ADR gerektirir: yeni top-level dizin, yeni bağımlılık kategorisi, katman kuralı istisnası, yeni servis sınırı, veri modeli değişimi, yeni async/queue mekanizması.
 
-Şablon: [`templates/adr.md`](../templates/adr.md). Bu ortamda `codebase-memory-mcp → manage_adr` mevcut.
+Şablon: [`templates/adr.md`](../templates/adr.md). Kabul edilen kararlar
+`docs/decisions/` altında versiyonlanır.
 
 Amaç dokümantasyon değil: **insanın 5.000 satır kod okumadan neyin değiştiğini anlaması.** ADR, review yüzeyini küçültme aracıdır → [`05` §3.2](05-roles.md).
 
@@ -196,12 +205,12 @@ Amaç dokümantasyon değil: **insanın 5.000 satır kod okumadan neyin değişt
 
 [`07`](07-metrics.md)'ye eklenenler:
 
-| Metrik | Hedef | Neyi yakalar |
+| Metrik | Başlangıç kullanımı | Neyi yakalar |
 |---|---|---|
-| Fitness function ihlali | 0 | Mimari erozyon |
-| Diff'in getirdiği yeni duplikasyon | < %3 | Yeniden-icat |
-| Bağımlılık sayısı değişimi | net ≈ 0 | Şişme |
-| Gerekçesiz public sembol artışı | 0 | Yüzey sprawl |
-| Impact tahmin isabeti (tahmin edilen ÷ gerçekte kırılan test) | > %80 | Kod grafı kalitesi |
-| Ölü kod trendi | azalan | Birikim |
-| ADR'siz yapısal değişiklik | 0 | Görünmez karar |
+| Enforced fitness function ihlali | Değişmez: 0 | Mimari erozyon |
+| Diff'in getirdiği yeni duplikasyon | Baseline → repo bütçesi | Yeniden-icat |
+| Bağımlılık sayısı değişimi | Gözlem + gerekçe | Şişme |
+| Gerekçesiz public sembol artışı | Değişmez: 0 | Yüzey sprawl |
+| Impact tahmin isabeti (tahmin edilen ÷ gerçekte kırılan test) | Baseline → iyileştirme | Kod grafı kalitesi |
+| Ölü kod trendi | Gözlem → azalan trend | Birikim |
+| ADR'siz yapısal değişiklik | Değişmez: 0 | Görünmez karar |

@@ -1,6 +1,7 @@
 # 06 — Operasyon: CI, Döngü Süresi, Spec Değişimi, Güvenlik Sınırları, Escalation
 
-> **Normatif.** v1.0'da bu konuların hiçbiri yoktu (CI sırası hariç, o da döngü süresini gözetmiyordu).
+> **Normatif rehber önerisi.** Bu bölüm hedef repo operasyonunu anlatır; bu
+> Markdown rehberinin kendi CI/TDD mimarisi değildir.
 
 ---
 
@@ -13,7 +14,7 @@ v1.0'ın CI sırası merge gate'ine kadar **~26 dakika**, E2E dahil ~36 dakika s
 ### 1.2 Üç şeritli model
 
 ```
-┌─ FAST LANE ──────────────────────────── hedef < 3 dk ─┐
+┌─ FAST LANE ───────────────────────────── repo p95 SLO ─┐
 │ ajan her push'ta koşar, ajan çıktısını GÖRÜR          │
 │                                                        │
 │ 1. Statik kapılar (tip + lint + derleme)      ~30 sn  │
@@ -24,7 +25,7 @@ v1.0'ın CI sırası merge gate'ine kadar **~26 dakika**, E2E dahil ~36 dakika s
 │ 6. Criteria coverage checker                  ~5 sn  │  ← tools/
 └────────────────────────────────────────────────────────┘
                           ▼  yeşilse PR açılabilir
-┌─ MERGE LANE ─────────────────────────── hedef < 12 dk ┐
+┌─ MERGE LANE ──────────────────────────── repo p95 SLO ┐
 │ PR review-ready olduğunda                             │
 │                                                        │
 │  7. Tam unit + property suite                 ~2 dk   │
@@ -33,16 +34,17 @@ v1.0'ın CI sırası merge gate'ine kadar **~26 dakika**, E2E dahil ~36 dakika s
 │ 10. Contract diff / oasdiff (breaking → G3)   ~1 dk   │
 │ 11. SAST (değişen dosyalar)                   ~2 dk   │
 │ 12. Incremental mutation (diff)               ~3 dk   │  ← 02 §4.4
-│ 13. Diff coverage ≥ %85                       ~1 dk   │
+│ 13. Repo-kalibreli diff coverage              ~1 dk   │
 │ 14. Duplikasyon + API surface diff            ~1 dk   │  ← 04 §3-4
 │ 15. Kırmızı kanıtı (CI üretir)                ~1 dk   │  ← §2
 │ 16. Risk sınıflandırma → G2 gerekiyor mu      ~5 sn   │  ← 05 §3.3
 └────────────────────────────────────────────────────────┘
                           ▼
-┌─ MERGE QUEUE ──────────────────────────────────────────┐  ← 03 §5
-│ güncel main üzerine rebase + yeniden koşum             │
-│ 17. GİZLİ TEST SETİ (sızdırmayan rapor)       ~5 dk   │  ← 02 §4.3
-│ 18. E2E kritik yolculuklar (max 10)          ~10 dk   │
+┌─ MERGE QUEUE / merge_group ────────────────────────────┐  ← 03 §5
+│ sentetik birleşik SHA üzerinde 7–16 DAHİL tüm required │
+│ check'ler tekrar koşar                                  │
+│ 17. DIŞ/İZOLE hidden evaluator required check          │  ← 02 §4.3
+│ 18. E2E kritik yolculuklar                              │
 └────────────────────────────────────────────────────────┘
                           ▼  main
 ┌─ NIGHTLY / WEEKLY (gate değil, trend) ─────────────────┐
@@ -51,15 +53,19 @@ v1.0'ın CI sırası merge gate'ine kadar **~26 dakika**, E2E dahil ~36 dakika s
 └────────────────────────────────────────────────────────┘
 ```
 
+Şemadaki süreler örnek bütçedir, taşınabilir eşik değildir. İlk pilotta her
+adımın p50/p95 süresi ölçülür; stack'e özgü SLO ve shard/cache kararı bu
+baseline'dan çıkar.
+
 ### 1.3 Hız kuralları
 
 | Kural | Gerekçe |
 |---|---|
 | **Fast lane yeşil olmadan push/PR yok** — lokalde de koşabilir olmalı | Ajanın CI'ı deneme-yanılma aracı olarak kullanmasını engeller |
 | **Fast lane tam suite koşmaz**, impact-seçilmiş alt küme koşar | Hem hız hem doğruluk → [`04` §5](04-codebase-integrity.md) |
-| **Fast lane > 3 dk olursa iş budur, optimize edilir** | Cycle time gate'lerden önce gelir |
+| **Fast lane repo p95 SLO'sunu aşarsa optimizasyon işi açılır** | Cycle time gate'lerden önce gelir; SLO baseline sonrası sürümlenir |
 | **Paralel shard** | Suite büyüdükçe süre sabit kalmalı |
-| **Ajan merge queue log'una erişemez** | Gizli set sızıntısı → [`02` §4.3](02-spec-fidelity.md) |
+| **Normal merge_group log'u görünür, hidden evaluator ham log'u kapalıdır** | Debug edilebilirlik korunur; yalnız hidden oracle sızmaz |
 
 ---
 
@@ -68,20 +74,24 @@ v1.0'ın CI sırası merge gate'ine kadar **~26 dakika**, E2E dahil ~36 dakika s
 Neden ajanın ürettiği log kanıt değil: [`02` §4.5](02-spec-fidelity.md). Mekanizma:
 
 ```
-PR yapısı ZORUNLU olarak iki commit içerir:
-  commit A : yalnız test (acceptance/regression için QA ajanı tarafından)
-  commit B : implementasyon (Engineer ajanı)
+Yeni kilitli oracle içeren integration PR:
+  commit A : QA-imzalı, yalnız izinli oracle path'leri
+  commit B : Engineer implementasyonu
 
-CI (ajanın dokunamayacağı adım):
-  1. commit A'yı checkout et
-  2. commit A'daki yeni/değişen testleri koş
-  3. KIRMIZI olmalı. Yeşilse → PR REDDEDİLİR
-       (yeşil = test hiçbir şey doğrulamıyor, ya da davranış zaten vardı)
-  4. commit B'yi checkout et → aynı testler YEŞİL olmalı
-  5. Sonucu CI'ın kendi imzalı artefaktına yaz
+Adapter CI:
+  1. commit sırasını, yazar rolünü ve path saflığını doğrular
+  2. base + commit A state'inde yalnız yeni test kimliğini çalıştırır
+  3. beklenen ASSERTION FAILURE sınıfını doğrular
+     syntax/import/setup/timeout/altyapı hatası → GEÇERSİZ KANIT
+  4. HEAD state'inde aynı test kimliği yeşil olmalıdır
+  5. sonucu CI attestation'ına yazar
 ```
 
-**Adım 3 asıl değeri taşıyor:** "hiçbir şey assert etmeyen test" sınıfını doğrudan yakalar. Coverage ve mutation'dan bağımsız, bedava bir sinyaldir.
+Generic “komut non-zero döndü” mekanizması güvenli değildir. Test kimliği ve failure
+Sınıf framework adapter'ıyla doğrulanmadıkça kırmızı kanıt mekanizması yalnız
+pilot önerisidir.
+Mevcut kilitli oracle değişikliği ayrı PR'dır; Engineer unit/integration testleri
+ise üretim koduyla aynı PR'da olabilir.
 
 Kapsam: acceptance + regresyon + bug-fix PR'ları. Saf refactor PR'ları muaf (davranış değişmiyor → yeni test yok).
 
@@ -94,11 +104,11 @@ Kapsam: acceptance + regresyon + bug-fix PR'ları. Saf refactor PR'ları muaf (d
 | Kural | Detay |
 |---|---|
 | **Tespit** | Aynı commit'te 2 koşumdan farklı sonuç, veya son 20 koşumda ≥2 tutarsızlık |
-| **Otomatik karantina** | Flaky test **otomatik** olarak quarantine'a alınır ve gate'ten çıkarılır. Kırmızı bırakılmaz. |
+| **Kontrollü karantina** | Tespit edilen test ayrı quarantine lane'e alınır. Kritik AC'nin tek oracle'sıysa replacement olmadan required gate'ten çıkarılamaz. |
 | **Sahip ataması zorunlu** | Karantina anında test sahibine (QA veya Engineer) görev açılır |
-| **Karantina TTL: 7 gün** | Süre sonunda düzeltilmediyse test **silinir** ve kapsadığı AC "testsiz" olarak raporlanır → criteria coverage kırılır. Böylece flake'i görmezden gelmek imkânsızlaşır. |
+| **Karantina TTL** | Repo policy'sinde kalibre edilir. Süre dolunca release/merge gate'i bloke edilir ve insana escalate edilir; test otomatik silinmez. |
 | **Ajan flaky testi değiştiremez** | Karantinadaki test test sahibinin sorumluluğunda |
-| **Metrik** | Flake oranı > %1 → CI güvenilirliği acil iş |
+| **Metrik** | Flake oranı baseline'a göre yükseliyorsa CI güvenilirliği işi açılır |
 
 **Anti-pattern:** Retry ile flake gizlemek. Retry, flake'i *maskeler* ve ajanın gördüğü sinyali bozar. Retry yalnız bilinen dış bağımlılık (network) için, açık gerekçeyle.
 
@@ -185,7 +195,7 @@ Ajan yapabilir ama **insan onayı** ister: migration çalıştırma (staging bil
 |---|---|---|
 | Aynı fast lane hatası tekrar ediyor | 3 deneme | DUR, insana escalate |
 | Toplam iterasyon | 10 | DUR, kısmi işi rapor et |
-| Süre | 4 saat (= lease TTL) | DUR, lease serbest |
+| Süre | Aktif lease'in `lease_expires` değeri | DUR; fencing varsa yeni token ile release, yoksa insan tahkimi |
 | Aynı testi 2. kez "düzeltmeye" kalkışıyor | 2 | DUR — spec gaming sinyali, insana escalate |
 | Gizli set kırıldı | 1 | DUR — ajan kendi başına düzeltmeyi denemez, insana gider ([`05` §4](05-roles.md)) |
 | Claim çakışması | 1 | DUR, bekle veya böl ([`03` §4.2](03-concurrency.md)) |

@@ -16,7 +16,7 @@
 | Security (#7) | `Semgrep` custom rule (auth sınırı) · `Gitleaks` · `OSV-Scanner` · SBOM · authz contract (BOLA/BFLA) |
 | Property-based (#8) | `Hypothesis` (Py) · `fast-check` (TS) · `jqwik` (JVM) — para, kota, state machine, idempotency |
 | Mutation (#9) | `mutmut`/`cosmic-ray` (Py) · `Stryker` (TS) · `PIT` (JVM) — **incremental, diff'te** |
-| E2E (#10) | API seviyesi uçtan uca, max 10 |
+| E2E (#10) | API seviyesi uçtan uca, risk-seçilmiş küçük set |
 | Snapshot (#11) | API response snapshot (şema değil gövde) |
 | Perf (#13) | `k6` — p95 latency bütçesi |
 
@@ -29,7 +29,7 @@ Multi-agent'ta en kritik backend kalemi. Sıralama **zorunlu**:
 ```
 1. agent:techlead OpenAPI şemasını yazar        (contracts/)
 2. Şema kendi PR'ında merge edilir              ← BARİYER
-3. CI client/stub üretir                        (generated/, commit EDİLMEZ)
+3. CI client/stub üretir                        (generated politikası projeye göre)
 4. ANCAK ŞİMDİ backend + istemci ajanları paralel açılır
 ```
 
@@ -75,10 +75,10 @@ Gate'ler:
 | Dosya | Politika |
 |---|---|
 | `db/migrations/**` | **Timestamp/ULID isimlendirme** (sıralı numara = garantili çakışma) · daima kendi PR'ı · `agent:migration` · geri alınabilir |
-| Lockfile'lar | `agent:deps` · feature PR'ında commit edilmez |
-| `generated/**` (client, protobuf, ORM tipleri) | Commit edilmez, CI üretir |
-| Route tablosu / DI container | Öncelik: **auto-discovery**. Mümkün değilse satır başına tek kayıt + `merge=union` |
-| i18n / mesaj dosyaları | Satır başına tek anahtar, sıralı, `merge=union` + çakışma kontrolü |
+| Lockfile'lar | `agent:deps` · manifest ile aynı bağımlılık PR'ında commit edilir · CI temiz üretimin aynı lockfile'ı verdiğini doğrular |
+| `generated/**` (client, protobuf, ORM tipleri) | ADR ile tek strateji: ya kaynak contract'tan CI üretir ve commit edilmez, ya toolchain sabitlenerek atomik commit edilir |
+| Route tablosu / DI container | Öncelik: **auto-discovery**. Manuel ise tek sahip/lease + yinelenen kayıt ve sıralama doğrulaması; otomatik union yok |
+| i18n / mesaj dosyaları | Yapısal parser ile yinelenen anahtar/şema kontrolü + tek sahip veya kısa lease; otomatik union yok |
 | `openapi.yaml` | `agent:techlead` tek sahip |
 
 ---
@@ -86,7 +86,7 @@ Gate'ler:
 ## 6. Fast lane komutu (docs/06 §1)
 
 ```bash
-# hedef < 3 dk — push etmeden önce yeşil olmalı
+# hedef repo p95 SLO'su — push etmeden önce yeşil olmalı
 <typecheck> && <lint> && <fitness-check> && <secret-scan-diff> \
   && python3 tools/criteria_coverage.py \
   && <impact-selected-tests>
@@ -105,4 +105,4 @@ Gate'ler:
 | Repository'yi mock'layıp "integration test" demek | Unit test'tir, dikişi test etmez |
 | Authz'ı yalnız happy path'te test etmek | BOLA/BFLA negatif senaryo zorunlu |
 | OpenAPI'yi CI'a bağlamamak | Dekorasyon |
-| Generated client'ı commit etmek | Çakışma + bayat kod |
+| Generated client politikasını tanımlamamak | Bir ajan commit ederken diğeri CI üretimine güvenir; bayat veya yinelenen çıktı oluşur |

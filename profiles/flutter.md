@@ -69,18 +69,19 @@ Zorunlu ayarlar:
 
 | Dosya | Politika |
 |---|---|
-| `pubspec.yaml` / `pubspec.lock` | `agent:deps` tek sahip · lock feature PR'ında commit edilmez |
-| `*.g.dart`, `*.freezed.dart` | **Commit edilmez** — CI `build_runner` ile üretir. Zorunluysa `linguist-generated` + tek sahip |
-| `lib/l10n/*.arb` | Satır başına tek anahtar, sıralı, `merge=union` + anahtar çakışma kontrolü |
-| Route tablosu (`app_router.dart`) | Auto-discovery / kod üretimi tercih et; değilse `merge=union` |
+| `pubspec.yaml` / `pubspec.lock` | `agent:deps` tek sahip · aynı bağımlılık PR'ında atomik commit · CI temiz çözümlemenin aynı lockfile'ı verdiğini doğrular |
+| `*.g.dart`, `*.freezed.dart` | ADR ile tek strateji: CI üretimi veya sabit toolchain ile atomik commit; iki model karıştırılmaz |
+| `lib/l10n/*.arb` | ARB parser ile yinelenen anahtar/şema kontrolü + tek sahip veya kısa lease; otomatik union yok |
+| Route tablosu (`app_router.dart`) | Auto-discovery / kod üretimi tercih et; manuel ise tek sahip + semantik duplicate/ordering kontrolü |
 | DI kaydı (`injection.dart`) | Aynı — `get_it` manuel kaydı yerine `injectable` kod üretimi |
 | `ios/Podfile.lock` | `agent:deps` |
 | `ios/Runner.xcodeproj/project.pbxproj` | Tek sahip · ayrı PR (merge kâbusu) |
 | `android/app/build.gradle` | Tek sahip · ayrı PR |
 | `design/tokens/**` | `agent:designer` + insan Designer |
 
-> `*.g.dart` çakışması Flutter'da en yaygın ajan çakışmasıdır. Commit etmemek
-> problemi tamamen ortadan kaldırır.
+> `*.g.dart` için stratejiyi repo çapında tekleştirmek esastır. Commit etmeme
+> modeli yalnız CI'ın aynı toolchain ile deterministik üretim yaptığı projelerde
+> güvenlidir.
 
 ---
 
@@ -100,7 +101,7 @@ Fast lane'de tam suite yerine bu alt kümeyi koş.
 ## 6. Fast lane komutu (docs/06 §1)
 
 ```bash
-# hedef < 3 dk
+# hedef pilot baseline'ından türetilen repo p95 SLO'su
 dart analyze --fatal-infos \
   && dart run dart_code_metrics:metrics check-unused-code lib \
   && <fitness-check> \
@@ -117,7 +118,7 @@ dart analyze --fatal-infos \
 | ❌ | Neden |
 |---|---|
 | Ekran seviyesinde golden test | Pixel diff cehennemi, sürekli kırılır |
-| `*.g.dart` commit etmek | En yaygın Flutter ajan çakışması |
+| Generated dosya stratejilerini aynı repoda karıştırmak | En yaygın Flutter ajan çakışması ve drift kaynağı |
 | `pumpAndSettle` yerine sabit `Duration` beklemek | Flake üretir → ajana test zayıflatmayı öğretir |
 | Widget testinde gerçek HTTP | Yavaş + flaky; client'ı fake'le, widget ağacını gerçek tut |
 | Her widget'ı mock'layıp "widget test" demek | Dikişi test etmez |

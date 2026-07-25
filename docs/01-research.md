@@ -9,7 +9,7 @@
 
 | Bulgu | Kaynak | Kanıt gücü |
 |---|---|---|
-| SDD'de spec, "dokümantasyon" değil **çalıştırılabilir sözleşme**; ajanların üretimini kısıtlayan bir gate | GitHub Spec Kit, Augment Code SDD kılavuzu | Pratik / araç |
+| SDD araçları spec'i yalnız dokümantasyon değil, üretimi yönlendiren ve bazı iddiaları gate'e bağlayan sözleşme olarak kullanıyor | GitHub Spec Kit, Augment Code SDD kılavuzu | Pratik / araç |
 | Kent Beck: TDD, ajanlarla çalışırken "süper güç" — çünkü test, **ajanın değiştirmesine izin verilmeyen** tek kod parçası | Pragmatic Engineer röportajı üzerine yazılar | Uzman görüşü |
 | SDD ve TDD rakip değil, **katmanlı**: prose spec *niyeti*, test *başarının tanımını* taşır | Allstacks analizi | Analiz |
 | Spec eksikliği eğrisi **U şeklinde**: minimum maliyet noktası "iyi yapılandırılmış kabul kriteri / BDD senaryosu" seviyesinde | O'Reilly Radar | Analiz |
@@ -20,7 +20,7 @@
 | OpenAPI spec CI'a executable contract olarak bağlanmamışsa **dekorasyondur** | Schema validation araştırmaları | Pratik |
 | Ajanlar "coşkulu test yazarı": rehbersiz bırakıldığında repodaki baskın deseni kopyalayıp 15 dakikalık integration test yığını üretiyor. Çözüm: repoda **test taksonomisi skill dosyası** | Nick Perkins, agentic testing | Saha gözlemi |
 | Ciddi ajan hataları çoğu zaman **derleme hatası veya kırmızı test olarak görünmüyor**. Baskın kategoriler: constraint violation, **destructive operations**, authorization bypass, **deception / fabricated success reports**. 547 gerçek olay, 326'sı high/critical | "What Breaks When LLMs Code?", arXiv 2605.30777 | **Ölçüm (ampirik tarama)** |
-| Hidden test split + semantic mutation + spec-evolution regresyon testi, ajan davranışını spec'e sabitlemek için çalışan bir üçlü | "Test-Driven AI Agent Definition", arXiv 2603.08806 | **Ölçüm** ⚠ bkz. 1.4 |
+| Hidden split + semantic mutation + spec-evolution regresyonu, tool-using agent tanımı domain'inde birlikte değerlendirilmiş bir yaklaşım | "Test-Driven AI Agent Definition", arXiv 2603.08806 | **Ölçüm (analog domain)** ⚠ bkz. 1.4 |
 
 ---
 
@@ -28,7 +28,9 @@
 
 Gürültü ayıklandığında tekrar eden 5 şikâyet:
 
-1. **"Ajan başarısız testi silip yeşile boyadı."** → En sık raporlanan şikâyet. Test dosyası yazma yetkisi kod ajanında olduğu sürece yapısal olarak kaçınılmaz. → Karşılık: [`02` §4.2 kilitli test dosyaları](02-spec-fidelity.md).
+1. **"Ajan başarısız testi silip yeşile boyadı."** → Tekrarlanan şikâyetlerden
+   biri. Kod ve kritik oracle aynı kimlik/yetki alanındaysa teşvik çatışması
+   oluşur. → Karşılık: [`02` §4.2 kilitli test dosyaları](02-spec-fidelity.md).
 2. **"Gerçek TDD (red/green/refactor) ajanla yaptıramıyorum."** → Ajan nihai testi yazıp implementasyonla birlikte yeşile getiriyor. → Karşılık: [`06` §2 CI-üretimli kırmızı kanıtı](06-operations.md).
 3. **"Integration testlerini gen-AI'ye yazdırma; sen yaz, iş mantığı senin testini geçsin."** → Toplulukta en çok tekrarlanan somut kural. → Karşılık: [`05` rol matrisi](05-roles.md).
 4. **"Spec varken TDD'nin anlamı ne?"** → Yanlış ikilem. Spec *ne* sorusunu, test *doğru mu* sorusunu yanıtlıyor.

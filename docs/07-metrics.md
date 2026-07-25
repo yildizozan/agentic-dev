@@ -1,102 +1,122 @@
 # 07 — Metrikler
 
-> **Normatif.** v1.0'da 5 metrik vardı ve hepsi spec sadakati eksenindeydi — repo'nun ilan ettiği ikinci amaç (çakışma) ve çürüme ekseni ölçülmüyordu.
+> **Normatif rehber.** Bu bölüm ölçüm modelini ve kalibrasyon yöntemini tanımlar.
+> Bir metriğin hedef repoda gerçekten gate olup olmadığı o reponun CI/ruleset
+> ayarından doğrulanır.
 
-**Birinci kural:** Toplam satır coverage'ı **dashboard'a bile koyma.** Ajanlı sistemde en yanıltıcı metrik odur.
+Toplam satır coverage'ı tek başına kalite göstergesi veya merge gate'i değildir.
+İstenirse tanı amaçlı tutulabilir; karar sinyali kriter, değişim ve mutation
+kapsaması gibi davranışa yakın metriklerden gelir.
+
+## 1. Hedef türleri
+
+Metrikleri aynı tür eşik gibi ele alma:
+
+| Tür | Kullanım | Örnek |
+|---|---|---|
+| **Değişmez (invariant)** | İhlali doğrudan hatadır; baseline beklemez | claim ihlali = 0, aktif AC referansı = %100 |
+| **Kalibre gate** | Önce en az iki sprint baseline, sonra sürümlü repo eşiği | mutation, diff coverage, süre |
+| **Gözlem** | Trend ve teşhis içindir; merge engellemez | escalation oranı, maliyet / AC |
+
+Gate eşikleri repoda sürüm kontrollü, görünür ve lokal olarak yeniden
+üretilebilir olmalıdır. “Gizli hedef” güvenlik kontrolü değildir.
 
 ---
 
-## 1. Sadakat metrikleri
+## 2. Sadakat metrikleri
 
-| Metrik | Hedef | Neyi yakalar | Kaynak |
+| Metrik | Başlangıç kullanımı | Neyi yakalar | Kaynak |
 |---|---|---|---|
-| **Kriter kapsaması** (AC'lerin testli oranı; gizli manifest dahil) | %100 | Spec drift | [`tools/criteria_coverage.py`](../tools/criteria_coverage.py) |
-| **Mutation skoru** (diff, kritik modüller) | ≥ %80 | Sahte/boş testler | incremental mutation, PR gate |
-| **Gizli set geçme oranı** | ≥ %95 | Görünür teste overfit / spec gaming | merge queue |
-| **Değişim kapsaması** (diff coverage) | ≥ %85 | Test edilmemiş ajan çıktısı | merge lane |
-| **Kırmızı kanıtı başarısızlığı** (yeni testin baştan yeşil çıkma oranı) | < %5 | Hiçbir şey assert etmeyen test | [`06` §2](06-operations.md) |
-| **Regresyon oranı** (merge sonrası kırılan test / PR) | < %2 | Ajan kalite trendi | ⚠ §5 |
+| **Kriter kapsaması** (aktif AC'lerin doğrulanmış test referansı) | **Değişmez: %100** | Spec drift | [`tools/criteria_coverage.py`](../tools/criteria_coverage.py) |
+| **Mutation skoru** (diff, kritik modüller) | Baseline → repo eşiği | Sahte/boş testler | incremental mutation |
+| **Harici gizli evaluator geçme oranı** | İzolasyon kurulunca baseline → repo eşiği | Görünür teste overfit / spec gaming | dış trust boundary |
+| **Değişim kapsaması** (diff coverage) | Baseline → repo eşiği | Test edilmemiş ajan çıktısı | merge lane |
+| **Geçersiz kırmızı kanıtı** | **Değişmez: 0** | Yanlış test, syntax/import hatasını kanıt sayma | [`06` §2](06-operations.md) |
+| **Yeni testin başlangıçta yeşil olma oranı** | Gözlem; gerekçeye göre sınıflandır | Zaten var olan davranış veya zayıf oracle | [`06` §2](06-operations.md) |
+| **Regresyon oranı** (merge sonrası kırılan test / PR) | Baseline → düşüş hedefi | Ajan kalite trendi | §6 |
 
 ---
 
-## 2. Çakışma metrikleri
+## 3. Çakışma metrikleri
 
-| Metrik | Hedef | Neyi yakalar |
+| Metrik | Başlangıç kullanımı | Neyi yakalar |
 |---|---|---|
-| **Merge sonrası kırılma oranı** | < %1 | Merge queue eksikliği, semantik çakışma |
-| **Aynı-dosya eşzamanlılık** (aynı dosyaya dokunan eşzamanlı açık PR oranı) | < %5 | Kötü görev bölme |
-| **Merge conflict oranı** | < %10 | Sahiplik ihlali, uzun branch ömrü |
-| **Ortalama branch ömrü** | < 8 saat | Çakışmanın öncü göstergesi |
-| **Rebase / PR** | < 2 | Aşırı paralellik |
-| **Revert oranı** | < %2 | Yakalanmamış semantik çakışma |
-| **Claim ihlali** | 0 | Protokol uyumu |
-| **Invalidation gecikmesi** (contract/AC değişimi → etkilenen ajana bildirim) | < 5 dk | Eski gerçeklikte çalışan ajan |
+| **Merge sonrası kırılma oranı** | Baseline → düşüş hedefi | Eksik merge-group doğrulaması, semantik çakışma |
+| **Aynı-dosya eşzamanlılık** | Gözlem → görev bölme bütçesi | Kötü görev bölme |
+| **Merge conflict oranı** | Baseline → repo eşiği | Sahiplik ihlali, uzun branch ömrü |
+| **Branch ömrü** | p50/p95 ölç → stack SLO'su | Çakışmanın öncü göstergesi |
+| **Rebase / PR** | Gözlem | Aşırı paralellik |
+| **Revert oranı** | Baseline → düşüş hedefi | Yakalanmamış semantik çakışma |
+| **Claim ihlali** | **Değişmez: 0** | Protokol uyumu |
+| **Invalidation gecikmesi** (contract/AC değişimi → etkilenen ajana bildirim) | Ölç → operasyon SLO'su | Eski gerçeklikte çalışan ajan |
 
 ---
 
-## 3. Bütünlük metrikleri
+## 4. Bütünlük metrikleri
 
-| Metrik | Hedef | Neyi yakalar |
+| Metrik | Başlangıç kullanımı | Neyi yakalar |
 |---|---|---|
-| **Fitness function ihlali** | 0 | Mimari erozyon |
-| **Diff'in getirdiği yeni duplikasyon** | < %3 | Yeniden-icat |
-| **Bağımlılık sayısı değişimi** | net ≈ 0 | Şişme |
-| **Gerekçesiz public sembol artışı** | 0 | API yüzeyi sprawl |
-| **Impact tahmin isabeti** | > %80 | Kod grafı kalitesi |
-| **Ölü kod trendi** | azalan | Birikim |
-| **ADR'siz yapısal değişiklik** | 0 | Görünmez karar |
-| **Grounding sorgusu olmayan PR** | 0 | Yeniden-icadın kaynağı |
+| **Enforced fitness function ihlali** | **Değişmez: 0** | Mimari erozyon |
+| **Diff'in getirdiği yeni duplikasyon** | Baseline → repo bütçesi | Yeniden-icat |
+| **Bağımlılık sayısı değişimi** | Gözlem + gerekçe zorunluluğu | Şişme |
+| **Gerekçesiz public sembol artışı** | **Değişmez: 0** | API yüzeyi sprawl |
+| **Impact tahmin isabeti** | Baseline → iyileştirme | Kod grafı kalitesi |
+| **Ölü kod trendi** | Gözlem → azalan trend | Birikim |
+| **ADR'siz yapısal değişiklik** | **Değişmez: 0** | Görünmez karar |
+| **Grounding kaydı olmayan PR** | Manuel kontrolken gözlem; enforcement sonrası 0 | Yeniden-icadın kaynağı |
 
 ---
 
-## 4. Akış ve insan metrikleri
+## 5. Akış ve insan metrikleri
 
-| Metrik | Hedef | Neyi yakalar |
+| Metrik | Başlangıç kullanımı | Neyi yakalar |
 |---|---|---|
-| **Fast lane süresi** (p95) | < 3 dk | Ajan döngü hızı — otonom sistemde birincil kısıt |
-| **Merge lane süresi** (p95) | < 12 dk | |
-| **Flake oranı** | < %1 | CI güvenilirliği; ajana test zayıflatmayı öğreten şey |
-| **Karantina TTL aşımı** | 0 | Görmezden gelinen flake |
-| **🔴 risk sınıfı PR oranı** | < %20 | İnsan review yükü sürdürülebilir mi |
-| **İnsan review dakikası / merge edilmiş AC** | azalan | Sistemin gerçek ölçeklenip ölçeklenmediği |
-| **Escalation oranı** | ölç, hedef koyma | Ajan yetkinlik sınırı nerede |
-| **Çöpe giden iş oranı** (reddedilen/terk edilen PR) | < %15 | Gerçek maliyet kalemi |
-| **Maliyet / merge edilmiş AC** | azalan | |
+| **Fast lane süresi** (p95) | Ölç → stack'e özgü SLO | Ajan döngü hızı |
+| **Merge lane süresi** (p95) | Ölç → repo SLO'su | Geri bildirim gecikmesi |
+| **Flake oranı** | Baseline → düşüş hedefi | CI güvenilirliği |
+| **Karantina TTL aşımı** | **Değişmez: 0** | Görmezden gelinen flake |
+| **🔴 risk sınıfı PR oranı** | Gözlem | İnsan review yükünün sürdürülebilirliği |
+| **İnsan review dakikası / merge edilmiş AC** | Gözlem → azalan trend | Sistemin gerçek ölçeklenmesi |
+| **Escalation oranı** | Gözlem; başlangıçta hedef koyma | Ajan yetkinlik sınırı |
+| **Çöpe giden iş oranı** | Baseline → düşüş hedefi | Reddedilen/terk edilen iş maliyeti |
+| **Maliyet / merge edilmiş AC** | Gözlem → azalan trend | Ekonomik verim |
 
 ---
 
-## 5. ⚠ Regresyon oranı hedefi hakkında dürüst kayıt
+## 6. Regresyon oranı hedefi hakkında dürüst kayıt
 
-v1.0 "regresyon oranı < %2" hedefi koymuştu. Bağlam:
+v1.0 “regresyon oranı < %2” hedefini evrensel bir eşik gibi sunuyordu.
+Dayandığı TDAD çalışmasındaki değerler şunlardı:
 
 | | Değer |
 |---|---|
 | TDAD baseline (vanilla ajan) | %6.08 |
-| TDAD + "TDD yap" prompt'u | %9.94 |
+| TDAD + “TDD yap” prompt'u | %9.94 |
 | TDAD + impact analysis | **%1.82** |
 
-Yani **< %2 hedefi, paper'ın state-of-the-art sonucudur** — ve v1.0 o sonucu üreten mekanizmayı (impact analysis) benimsememişti. Hedef, mekanizmasız olarak erişilemezdi.
+Bu sonuç belirli görev, model ve ölçüm düzenine aittir; bu repo veya başka bir
+hedef repo için garanti değildir. Impact analysis mekanizması yine değerlidir
+([`04` §5](04-codebase-integrity.md)), fakat eşik veri olmadan taşınamaz.
 
-Şimdi mekanizma benimsendi ([`04` §5](04-codebase-integrity.md)), ama:
-
-- Ölçüm **küçük açık-ağırlık modellerde** yapıldı → [`01` §1.3](01-research.md)
-- Frontier modellerin baseline'ı bilinmiyor — daha iyi de olabilir, farklı hata dağılımı da gösterebilir
-
-**Doğru yaklaşım:** İlk 2 sprint hedef koymadan **kendi baseline'ını ölç.** Hedefi kendi verinden türet. Başkasının benchmark sayısını hedef olarak ithal etmek, bu dokümanın eleştirdiği "ölçmeden iddia" hatasının aynısıdır.
-
-Aynı uyarı şunlar için de geçerli: gizli set geçme oranı ve mutation eşiği ([`01` §1.4](01-research.md) — analog domain'de ölçüldü).
+**Uygulama:** İlk iki sprint gate eşiği koymadan baseline ölç; örneklem sayısını,
+model sürümünü, görev dağılımını ve ölçüm tanımını kaydet. Sonra hata maliyetine
+ve ekip kapasitesine göre sürümlü eşik belirle. Aynı kural gizli evaluator,
+mutation, diff coverage, süre ve flake oranları için de geçerlidir.
 
 ---
 
-## 6. Metrik anti-pattern'leri
+## 7. Metrik anti-pattern'leri
 
 | ❌ | Neden |
 |---|---|
-| Toplam satır coverage'ı takip etmek | Ajanlı sistemde en yanıltıcı sayı |
-| Test **sayısını** takip etmek | Ajan istediğin kadar üretir; kalite sinyali sıfır |
-| Kapatılan görev sayısı | Çöpe giden işi ve rework'ü gizler |
-| Yazılan satır sayısı | Ters teşvik: çürümeyi ödüllendirir |
-| PR sayısı | Aynı |
-| Hedefi ajana metrik olarak vermek | Goodhart. Ajan metriği optimize eder, kaliteyi değil. **Metrikler insan içindir.** |
+| Toplam satır coverage'ını kalite özeti veya tek gate yapmak | Davranış ve oracle kalitesini göstermez |
+| Test **sayısını** hedeflemek | Ajan sayıyı kolayca şişirir |
+| Kapatılan görev veya PR sayısını başarı saymak | Rework ve çöpe giden işi gizler |
+| Yazılan satır sayısını ödüllendirmek | Çürümeyi teşvik eder |
+| Benchmark eşiğini doğrudan hedef repoya taşımak | Model, stack ve hata maliyetini yok sayar |
+| Eşiği ajandan saklamak | Lokal yeniden üretimi engeller; güvenlik sınırı oluşturmaz |
+| Yalnız eşik çevresindeki tek sayıyı izlemek | Goodhart etkisini ve dağılımı gizler |
 
-**Son kural:** Hiçbir gate eşiği ajanın system prompt'unda sayı olarak yazmaz. Ajan "mutation %80 olmalı" bilgisini alırsa %80'i hedefler. Gate'i CI uygular, ajan yalnız sonucu görür.
+Her gate adı, formülü, örneklem penceresi, istisnası ve eşik değişiklik geçmişiyle
+birlikte görünür olmalıdır. Ajan sonucu ve nasıl yeniden üreteceğini görür; insan
+ise trend dağılımını, eşik çevresindeki yığılmayı ve kaçış oranını ayrıca izler.

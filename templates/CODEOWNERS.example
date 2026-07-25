@@ -4,7 +4,7 @@
 #    Tek başına kurmak yaygın bir hatadır (docs/03 §10 anti-pattern).
 #    Yanına şunlar ZORUNLU:
 #      - branch protection: "Require review from Code Owners" + admin'lere de uygula
-#      - pre-commit hook: ownership-map.yml'ye göre yazma reddi
+#      - pre-commit hook: yalnız lokal hızlı geri bildirim
 #      - CI gate: sahiplik ihlali → kırmızı
 #      - feature ajanı token'ı: yalnız kendi branch'ine push
 #
@@ -34,7 +34,7 @@ Podfile.lock                    @deps-agent
 # ---- ajan kendi kısıtlarını/gate'lerini yazamaz (docs/05 §5, docs/06 §5.1) ----
 /.github/workflows/             @tech-lead-agent @human-product-owner
 /CODEOWNERS                     @human-product-owner
-/templates/ownership-map.yml    @tech-lead-agent @human-product-owner
+/ownership-map.yml              @tech-lead-agent @human-product-owner
 /AGENTS.md                      @tech-lead-agent @human-product-owner
 /.claude/                       @tech-lead-agent @human-product-owner
 /tools/                         @tech-lead-agent

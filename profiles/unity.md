@@ -57,7 +57,7 @@ Unity'de iki şey diğer her şeyden önce gelir:
 | Unit (#12) | **EditMode** test | Saf mantık: durum makinesi, kural motoru, hesaplama. I/O'suz deterministik mantık **%100 EditMode ile test edilebilir** — en ucuz kazanç. |
 | Property-based (#8) | EditMode + `FsCheck`/custom generator | Invariantlar: "skor negatif olamaz", "deste 52 kart korunur", "tur sırası döngüsel" |
 | Integration (#5) | **PlayMode** test | Sahne/lifecycle/prefab entegrasyonu |
-| Replay (#11) | **Deterministik replay** — §4 | En yüksek ROI |
+| Replay (#11) | **Deterministik replay** — §4 | Fizik/simülasyon içeren projelerde pilotla ölçülür |
 | E2E (#10) | PlayMode uçtan uca senaryo | Max 10 |
 | Perf (#13) | Profiler marker + CI eşiği | Frame bütçesi ihmal edilirse geri dönüşü pahalı |
 | Architecture fitness (#4) | **asmdef referans kısıtları** + `NetArchTest` | §2.2 |
@@ -69,7 +69,7 @@ Unity'de iki şey diğer her şeyden önce gelir:
 
 ## 4. Deterministik replay testi
 
-Fizik/simülasyon regresyonunu yakalayan en ucuz mekanizma.
+Fizik/simülasyon regresyonunu düşük maliyetle yakalayabilen bir mekanizma.
 
 ```
 Kurulum:
@@ -88,9 +88,11 @@ Zorunlu disiplin — bunlar olmadan replay flake üretir:
 - Float karşılaştırmasında hash öncesi **yuvarla** (platform farkı)
 - Platform bazlı baseline tut (macOS/Linux fizik sonucu birebir aynı olmayabilir)
 
-**Ne yakalar:** fizik parametresi kaymaları, çarpışma mantığı regresyonu, hesap
-zinciri bozulmaları. Ajan bu testi uyduramaz — hash'i geçmek için gerçekten
-doğru davranışı üretmek zorundadır.
+**Ne yakalar:** fizik parametresi kaymaları, çarpışma mantığı regresyonu ve hesap
+zinciri bozulmaları. Hash yalnız kaydedilmiş oracle'a uyumu gösterir; oracle
+yanlış, eksik veya ajan tarafından güncellenebilir durumdaysa doğru davranışı
+kanıtlamaz. Fixture/baseline sahipliği QA'da kalır ve semantik invariant
+testleriyle desteklenir.
 
 ---
 
@@ -118,9 +120,10 @@ Unity'de derleme yavaştır — fast lane hedefi zorlaşır. Stratejiler:
 | Fast lane'de yalnız **EditMode** koş | PlayMode merge lane'e |
 | Asmdef ile derlemeyi parçala | Kısmi yeniden derleme |
 | `-batchmode -nographics` | Headless |
-| PlayMode + replay testleri merge lane'de | Fast lane'i 3 dk'da tut |
+| PlayMode + replay testleri merge lane'de | Fast lane'i repo SLO'sunda tut |
 
-Gerçekçi hedef: fast lane < 5 dk (genel hedef 3 dk; Unity için dokümante edilmiş istisna).
+Unity fast lane SLO'su ilk pilotta EditMode derleme/test p95'inden türetilir;
+diğer stack'lerin eşiği doğrudan taşınmaz.
 
 ---
 

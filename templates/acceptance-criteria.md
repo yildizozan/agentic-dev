@@ -16,6 +16,8 @@ risk: normal              # normal | high  → high ise G2 zorunlu (docs/05 §3.
 
 > **Kural:** `approved: true` olmadan bu AC'ye karşı implementasyon başlamaz.
 > `criteria_coverage.py` onaysız aktif AC'de build'i kırar.
+> `approved_by` yalnız metadata'dır; gerçek G1 kanıtı protected CODEOWNERS review
+> veya eşdeğer imzalı attestation'dır. Serbest metin tek başına onay sayılmaz.
 
 ## Bağlam
 
@@ -76,7 +78,7 @@ genişletmesini engelleyen tek şey budur (docs/06 §6.3).
 - [ ] CI kırmızı kanıtını üretti (docs/06 §2)
 - [ ] Negatif senaryoların testi var
 - [ ] Ölçülebilir kısıtlar ölçülüyor
-- [ ] Diff coverage ≥ %85, incremental mutation ≥ %80
+- [ ] Repo tarafından baseline sonrası kalibre edilen diff-coverage ve mutation gate'leri geçti
 - [ ] Grounding sorgusu PR'da (docs/04 §7)
 - [ ] Impact analizi PR'da (docs/04 §5)
 - [ ] `risk: high` ise G2 insan review'ü yapıldı

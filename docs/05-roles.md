@@ -27,9 +27,9 @@ v1.0'da üç yerde üç farklı şey yazıyordu (§2 diyagramı "QA yazar", §3 
 | Adım | Kim | Çıktı |
 |---|---|---|
 | 1. Kabul kriterini ve Gherkin senaryo **taslağını** yaz | PM ajanı | `specs/acceptance-criteria/AC-###.md` |
-| 2. **Onayla** | **İnsan (G1)** | AC `approved: true` + onaylayan + tarih |
+| 2. **Onayla** | **İnsan (G1)** | Protected review/imzalı attestation + AC metadata'sı |
 | 3. Onaylı Gherkin'i **çalıştırılabilir teste** çevir | QA ajanı | `tests/acceptance/**` |
-| 4. Gizli varyantı yaz | QA ajanı | `tests/hidden/**` (görünmez) |
+| 4. Gizli varyantı yaz | Ayrı güven sınırındaki QA/evaluator | Harici oracle + görünür `tests/hidden/manifest.txt` |
 | 5. Implementasyon | Engineer ajanı | `src/**` |
 
 **Neden PM taslağı yazıyor, QA değil:** senaryo *spec'in kendisidir*. Spec sahibi PM'dir. QA'nın işi spec'i icat etmek değil, **çalıştırılabilir hale getirmek**.
@@ -59,7 +59,7 @@ Bu **kapalı bir döngüdür ve kendi içinde tutarlı biçimde yanlış olabili
 
 | Gate | Ne | Kim | Maliyet | Neden insan |
 |---|---|---|---|---|
-| **G1** | **AC onayı** — feature başlamadan önce kabul kriterleri okunur ve onaylanır | İnsan (ürün sahibi) | ~20 dk / feature | Zincirdeki tek ground truth. Pazarlıksız. |
+| **G1** | **AC onayı** — feature başlamadan önce kabul kriterleri okunur ve protected review/imzalı attestation ile onaylanır | İnsan (ürün sahibi) | ~20 dk / feature | Zincirdeki tek ground truth. Frontmatter serbest metni tek başına kanıt değildir. |
 | **G2** | **Risk-sıralı diff review** — kodun *tamamı* değil, riskli kısmı | İnsan | ~15 dk / PR | §3.3 |
 | **G3** | **Breaking contract change** onayı | İnsan | ~5 dk | Geri dönüşü pahalı, çapraz-ajan etkili |
 | **G4** | **Spec değişimi** onayı (AC v1 → v2) | İnsan | ~10 dk | Devam eden ajanları etkiler → [`06` §4](06-operations.md) |
@@ -119,4 +119,7 @@ Protokol:
 | **Değişiklik gerekçelidir** | "Ajan şunu yapmıyordu" → hangi PR'da hangi hata |
 | **İdeal: eval'i olur** | Prompt değişiminin regresyon yaratmadığı ölçülür. Pilotta zorunlu değil, v2'de hedef. |
 
-**Anti-pattern:** Ajan kendi system prompt'unu / skill dosyasını değiştirmesi. Sınavı da kuralı da kendisi yazan ajan, hizalanmış değildir. `CLAUDE.md`, `AGENTS.md`, `.claude/**` → feature ajanına write kapalı.
+**Anti-pattern:** Feature ajanının kendi system prompt'unu / skill dosyasını aynı
+feature kapsamında değiştirmesi. `CLAUDE.md`, `AGENTS.md`, `.claude/**` feature
+ajanına kapalıdır. Değişiklik yalnız açık insan talebi/onayıyla, Tech Lead
+sahipliğinde, ayrı governance kapsamı ve bağımsız kontrol testleriyle yapılır.

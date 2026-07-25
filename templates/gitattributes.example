@@ -11,24 +11,26 @@ generated/**            linguist-generated=true -diff
 *.pb.go                 linguist-generated=true -diff
 *_pb2.py                linguist-generated=true -diff
 
-# ---- Lockfile: feature PR'ında commit edilmez (docs/03 §6) ----
-# merge=ours = çakışmada bizim tarafı tut; lockfile merge queue'da yeniden üretilir.
-# ⚠ `merge=ours` driver'ı kurulmalı:  git config merge.ours.driver true
-package-lock.json       merge=ours -diff
-yarn.lock               merge=ours -diff
-pnpm-lock.yaml          merge=ours -diff
-pubspec.lock            merge=ours -diff
-Podfile.lock            merge=ours -diff
-Cargo.lock              merge=ours -diff
-poetry.lock             merge=ours -diff
+# ---- Lockfile: manifest ile aynı dependency PR'ında commit edilir ----
+# `merge=ours` YASAK: bağımlılık değişimini sessizce düşürür. CI temiz checkout'ta
+# lockfile'ı yeniden üretir ve diff olmadığını doğrular. Çakışma dependency sahibi
+# tarafından çözülür; merge queue çalışma ağacını değiştirip main'e yazamaz.
+package-lock.json       text eol=lf
+yarn.lock               text eol=lf
+pnpm-lock.yaml          text eol=lf
+pubspec.lock            text eol=lf
+Podfile.lock            text eol=lf
+Cargo.lock              text eol=lf
+poetry.lock             text eol=lf
 
-# ---- Append-only registry / i18n: union merge ----
-# Şart: satır başına tek kayıt + alfabetik sıra. Aksi halde union bozuk çıktı üretir.
-# Öncelikli çözüm manuel registry'yi kaldırıp auto-discovery kullanmaktır.
-**/i18n/*.properties    merge=union
-**/locales/*.csv        merge=union
-CHANGELOG.md            merge=union
-.gitignore              merge=union
+# ---- Registry / i18n: semantik doğrulama, otomatik union merge değil ----
+# Git'in `merge=union` sürücüsü satırları rastgele sırada birleştirebilir ve
+# sözdizimsel olarak geçerli fakat semantik olarak yanlış çıktı üretebilir.
+# Formatlayıcı + duplicate-key/parse kontrolü CI'da çalışır.
+**/i18n/*.properties    text eol=lf
+**/locales/*.csv        text eol=lf
+CHANGELOG.md            text eol=lf
+.gitignore              text eol=lf
 
 # ---- Unity: en kritik bölüm (docs/03 §6) ----
 # ZORUNLU ön koşul: Editor > Project Settings > Editor > Asset Serialization
@@ -58,9 +60,10 @@ CHANGELOG.md            merge=union
 *.wav                   filter=lfs diff=lfs merge=lfs -text
 *.mp4                   filter=lfs diff=lfs merge=lfs -text
 
-# ---- Xcode / Gradle: merge kâbusu, tek sahip + ayrı PR ----
-*.pbxproj               merge=union -diff
+# ---- Xcode / Gradle: otomatik merge kapalı, tek sahip + ayrı PR ----
+*.pbxproj               -merge
 *.xcworkspacedata       -diff
 
-# ---- Gizli test seti: diff'te görünmesin (docs/02 §4.3) ----
-tests/hidden/**         -diff
+# ---- Hidden manifest: içerik değil yalnız AC kimliği ----
+# Gerçek hidden testler bu repoda yaşamaz; `-diff` görünürlüğü engellemez.
+tests/hidden/manifest.txt text eol=lf

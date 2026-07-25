@@ -9,13 +9,16 @@
 
 ---
 
-## Proje adı yasağı (ZORUNLU)
+## Ürün bağlamı ve yeniden kullanılabilirlik
 
-> **Bu repoda hiçbir yerde somut bir ürün/proje adı geçmez.** Ne `docs/`'ta, ne
-> `templates/`'ta, ne profillerde, ne örneklerde, ne yorumlarda.
+Çekirdek `docs/` ve `templates/` üründen bağımsız kalır. Profiller
+teknoloji ile adlandırılır (`flutter.md`, `unity.md`, `backend.md`), ürün ile
+değil.
 
-Profiller **teknoloji** ile adlandırılır (`flutter.md`, `unity.md`, `backend.md`),
-ürün ile değil. Örnek gerekiyorsa **davranış sınıfı** yazılır, ürün değil:
+Vaka çalışmaları ve ölçüm raporları ise kanıtın bağlamını kaybetmemelidir.
+Paylaşım izni varsa ürün/proje adı veya anonim bir vaka kimliği kullanılabilir;
+model, stack, dönem ve görev dağılımı mutlaka kaydedilir. Örnek genellenebilir
+bir kuralı açıklıyorsa davranış sınıfı tercih edilir:
 
 | ❌ Yasak | ✅ Doğru |
 |---|---|
@@ -24,16 +27,9 @@ Profiller **teknoloji** ile adlandırılır (`flutter.md`, `unity.md`, `backend.
 | "\<oyun adı\>'nda kural motoru" | "I/O'suz deterministik mantık" |
 | "\<oyun adı\> vuruş hissi" | "kullanım hissi / etkileşim tepkisi" |
 
-**Neden kural:** Proje adı içeren bir best-practice repo'su yeniden kullanılamaz —
-ne başka bir takım alabilir, ne yeni bir proje eklendiğinde normatif doküman
-değişmeden kalabilir. Kural setinin ömrü, adı geçen projelerin ömrüne bağlanmış olur.
-
-Denetim (fast lane'e eklenebilir):
-
-```bash
-# proje adları için deny-list taraması — boş çıkmalı
-grep -rniE '<yasakli-ad-1>|<yasakli-ad-2>' --include='*' . && exit 1 || true
-```
+Ürün adını otomatik deny-list ile yasaklamak yerine gizlilik ve lisans kuralları
+uygulanır. Aksi halde gerçek pilot kanıtı bağlamından kopar ve denetlenemez hale
+gelir.
 
 ## Mevcut profiller
 
