@@ -4,20 +4,34 @@ Ajanlarla (Claude Code, Codex, Cursor…) yazılım geliştirirken kodun tamamı
 okunmuyor, codebase zamanla kopuyor ve birden fazla ajan birbirinin işini
 bozuyor. Bu repo bunun için **ne yapacağını** anlatır.
 
-## 👉 Buradan başla
+## 👉 Buradan başla — hangi dosyayı yazacaksın?
 
-**Projendeki ajanlara ne söyleyeceğini arıyorsan** → **[`templates/AGENTS.md`](templates/AGENTS.md)**
+Repo iki kola ayrılır. Ne yazdığına göre birini seç:
 
-Kopyala-yapıştır tek dosya. Kendi projenin köküne `AGENTS.md` olarak koy,
-`<...>` yerlerini doldur, bitti. Başka hiçbir şey okumana gerek yok.
+| | **[`harness/`](harness/)** | **[`hermes/`](hermes/)** |
+|---|---|---|
+| Ürettiğin dosya | **`AGENTS.md`** | **`SOUL.md`** |
+| Kapsam | **Proje** — repo ile yaşar | **Ajan** — her yere seninle gider |
+| İçerik | Komut, path, dokunma yasağı, iş akışı | Ses, ton, kararsızlık/itiraz davranışı |
+| Nereye koyulur | Proje kökü | `~/.hermes/profiles/<ad>/SOUL.md` |
+| Ortam | Claude Code · Codex · Cursor · **Hermes** | Hermes |
+| Şablon | **[`harness/AGENTS.template.md`](harness/AGENTS.template.md)** | **[`hermes/SOUL.template.md`](hermes/SOUL.template.md)** |
+| Hazır dosya | — (proje bazlı doldurman gerekir) | **[`hermes/profiles/`](hermes/profiles/)** — dev · qa · review · research |
 
-```
-Seviye 1  → tek ajanla çalışıyorsan (7 kural, ~40 satır). Bununla başla.
-Seviye 2  → birden fazla ajan aynı repoda çalışıyorsa (sahiplik, worktree, merge)
-```
+İkisi de kopyala-yapıştır, tek başına çalışır — başka hiçbir dosyayı okumana
+gerek yok. Hermes profilleri **doldurulmuş** geliyor; `AGENTS.md` projene özgü
+olduğu için `<...>` yerlerini sen dolduracaksın.
 
-Gerisi **neden** bölümü. Bir kuralın gerekçesini, kanıtını veya ölçümünü merak
-ettiğinde `docs/` altına gel — `AGENTS.md` yazmak için gerekmez.
+### Hermes kullanıyorsan: ikisi de gerekli
+
+Yaygın yanlış anlama "Hermes'te `SOUL.md` var, `AGENTS.md` gerekmez" — Hermes
+**ikisini birlikte okur**. Resmi kural:
+
+> *"if it should follow you everywhere, it belongs in `SOUL.md`;
+> if it belongs to a project, it belongs in `AGENTS.md`"*
+> — [Hermes: Personality & SOUL.md](https://hermes-agent.nousresearch.com/docs/user-guide/features/personality)
+
+Proje kuralını `SOUL.md`'ye koymak onu tüm projelere bulaştırır.
 
 <details>
 <summary>Bu repo ne <b>değil</b>?</summary>
@@ -25,6 +39,8 @@ ettiğinde `docs/` altına gel — `AGENTS.md` yazmak için gerekmez.
 Framework, policy motoru veya çalıştırılacak bir uygulama değil. Ürün; kaynakları
 açık, sınırlılıkları dürüst ve kendi repona uyarlanabilir **rehber içeriği**.
 Kurulacak bir şey yok; kopyalanacak şablonlar ve okunacak gerekçeler var.
+Tek istisna `tools/criteria_coverage.py` — hedef repo için referans bir kontrol,
+kendi testleriyle gelir.
 
 Son araştırma güncellemesi: **2026-07-25** ·
 yöntem: [Web + Reddit Saha Rehberi](docs/09-web-reddit-field-guide.md)
@@ -50,26 +66,40 @@ kendisinde aynı altyapıların kurulması zorunlu değildir.
 
 **Kısa yol (çoğu kişi buraya kadar):**
 
-1. [`templates/AGENTS.md`](templates/AGENTS.md)'i kopyala, doldur, projenin köküne koy.
-2. Bir hafta kullan. Üç şeyi say: ajan kapalı test dizinine dokunmaya çalıştı mı,
+1. Kolunu seç → [`harness/`](harness/) (`AGENTS.md`) veya [`hermes/`](hermes/) (`SOUL.md`).
+   Hermes kullanıyorsan ikisini de.
+2. Şablonu kopyala, `<...>` yerlerini doldur, doldurmadığın satırı **sil**.
+3. Bir hafta kullan. Üç şeyi say: ajan kapalı test dizinine dokunmaya çalıştı mı,
    "bitti" deyip bitirmedi mi, iki ajan aynı dosyada çakıştı mı.
-3. Sorun çıkan maddeyi derinleştir — aşağıdaki uzun yol.
+4. Sorun çıkan maddeyi derinleştir — aşağıdaki uzun yol.
 
 **Uzun yol (bir kuralın nedenini veya ölçümünü arıyorsan):**
 
-4. İhtiyacına göre sadakat, eşzamanlılık veya bütünlük bölümüne git (yukarıdaki tablo).
-5. [Roller](docs/05-roles.md), [operasyon](docs/06-operations.md) ve
+5. İhtiyacına göre sadakat, eşzamanlılık veya bütünlük bölümüne git (yukarıdaki tablo).
+6. [Roller](docs/05-roles.md), [operasyon](docs/06-operations.md) ve
    [metrikler](docs/07-metrics.md) ile öneriyi kendi organizasyonuna uyarla.
-6. [Pilot planı](docs/08-pilot.md) ile küçük bir deneme yap; evrensel eşik
+7. [Pilot planı](docs/08-pilot.md) ile küçük bir deneme yap; evrensel eşik
    kopyalamak yerine kendi baseline'ını ölç.
-7. Rehbere katkı yapacaksan [web + Reddit araştırma yöntemini](docs/09-web-reddit-field-guide.md)
+8. Rehbere katkı yapacaksan [web + Reddit araştırma yöntemini](docs/09-web-reddit-field-guide.md)
    uygula. [Kanıt sınırları](docs/01-research.md) burada.
 
 ## Repo haritası
 
 ```text
-templates/
-  AGENTS.md                 ★ ARADIĞIN ŞEY BU — kopyala-yapıştır, tek dosya
+harness/                    ★ AGENTS.md yazacaksan — proje kapsamlı kurallar
+  README.md                   yol haritası + Hermes ile ilişkisi
+  AGENTS.template.md          kopyala-yapıştır (Seviye 1: tek ajan · 2: çok ajan)
+
+hermes/                     ★ SOUL.md yazacaksan — ajan kapsamlı kimlik
+  README.md                   profil yapısı, komutlar, SOUL vs AGENTS ayrımı
+  profiles/                   HAZIR profiller (placeholder yok, kopyala-kullan)
+    dev/SOUL.md                 inşa eden — buradan başla
+    qa/SOUL.md                  doğrulayan
+    review/SOUL.md              inceleyen (farklı model ata)
+    research/SOUL.md            araştıran
+  SOUL.template.md            sıfırdan yazacaksan
+
+templates/                  opsiyonel proje artefaktları
   TESTING.md                  test taksonomisi (ajana test kuralı vermek istersen)
   CODEOWNERS.example          sahiplik/review
   gitattributes.example       çakışan dosya merge politikası
@@ -77,7 +107,7 @@ templates/
   acceptance-criteria.md      kabul kriteri şablonu
   adr.md · spec-change.md     karar kaydı · spec değişimi
 
-docs/                       ← "neden" bölümü, AGENTS.md yazmak için gerekmez
+docs/                       ← "neden" bölümü, şablon doldurmak için gerekmez
   01-research.md              araştırma bulguları ve kaynak sınırları
   02-spec-fidelity.md         spec, oracle ve test-gaming riskleri
   03-concurrency.md           ownership, worktree, lease ve merge queue
@@ -89,16 +119,16 @@ docs/                       ← "neden" bölümü, AGENTS.md yazmak için gerekm
   09-web-reddit-field-guide.md
                               dış bulgu → sınırlılık → rehber kararı
 
-profiles/                   stack eşlemeleri: backend · Flutter · Unity
+stacks/                     stack eşlemeleri: backend · Flutter · Unity
 ci/, tools/, specs/, tests/ hedef repo örnekleri (bu repoda kurulu değil)
 AGENTS.md                   bu REHBERE katkı yapan ajanlar için
-                            (projendeki ajanlar için olan → templates/AGENTS.md)
+                            (projendeki ajanlar için → harness/AGENTS.template.md)
 ```
 
-> `AGENTS.md` ile `templates/AGENTS.md` karıştırılmasın: ilki bu rehber
+> `AGENTS.md` ile `harness/AGENTS.template.md` karıştırılmasın: ilki bu rehber
 > repo'sunda çalışan ajanı, ikincisi **senin projendeki** ajanı yönetir.
 
-`profiles/`, `templates/`, `ci/`, `tools/`, `specs/` ve `tests/` altındaki
+`stacks/`, `templates/`, `ci/`, `tools/`, `specs/` ve `tests/` altındaki
 artefaktlar “bu repoda kurulması gereken mimari” değildir. Bunlar yalnız hedef
 kod repolarında tartışılan pratikleri somutlaştıran örneklerdir.
 

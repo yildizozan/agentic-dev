@@ -3,8 +3,9 @@
 > ⚠ **Bu dosya bu rehber repo'sunda çalışan ajan içindir** — yani rehber
 > içeriğini düzenleyen ajan.
 >
-> **Kendi projendeki ajanlara kural arıyorsan bu dosya değil:**
-> → **[`templates/AGENTS.md`](templates/AGENTS.md)** (kopyala-yapıştır, tek dosya)
+> **Kendi projendeki/profilindeki ajanlara kural arıyorsan bu dosya değil:**
+> - Proje kuralı (`AGENTS.md`) → **[`harness/AGENTS.template.md`](harness/AGENTS.template.md)**
+> - Hermes profil kimliği (`SOUL.md`) → **[`hermes/SOUL.template.md`](hermes/SOUL.template.md)**
 
 ---
 

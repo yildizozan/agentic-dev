@@ -33,16 +33,25 @@ domains:
     owner: agent:migration
     risk: high
     rule: "timestamp/ULID isimlendirme; daima kendi PR'ında; geri alınabilir"
+  # Uygulama lockfile'ları reproducibility icin source control'e alinir.
+  # Manifest ile AYNI bagimlilik PR'inda commit edilir; CI temiz checkout'ta
+  # yeniden uretip diff olmadigini dogrular. `merge=ours` YASAK — degisikligi
+  # sessizce dusurur. Detay: docs/03-concurrency.md §6
   - path: "**/package-lock.json"
     owner: agent:deps
-    rule: "feature PR'ında commit edilmez; merge queue'da yeniden üretilir"
+    rule: "manifest ile aynı PR'da commit edilir; CI deterministik üretimi doğrular"
   - path: "**/pubspec.lock"
     owner: agent:deps
+    rule: "aynı politika"
   - path: "**/Podfile.lock"
     owner: agent:deps
+    rule: "aynı politika"
+  # Generated kod: tek strateji ADR ile secilir. Ya kaynak contract'tan CI uretir
+  # ve commit edilmez, ya toolchain sabitlenip atomik commit edilir. Ikisinin
+  # karisimi bayat/yinelenen cikti uretir. Detay: docs/03-concurrency.md §6
   - path: "generated/**"
     owner: agent:ci
-    rule: "commit edilmez; dondurulmuş contract'tan CI üretir"
+    rule: "ADR ile tek strateji: CI üretir (commit yok) VEYA sabit toolchain + atomik commit"
 
   # --- kural ve konfigürasyon: ajan kendi kısıtını yazamaz (docs/05 §5) ---
   - path: ".github/workflows/**"
