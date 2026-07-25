@@ -39,8 +39,6 @@ Proje kuralını `SOUL.md`'ye koymak onu tüm projelere bulaştırır.
 Framework, policy motoru veya çalıştırılacak bir uygulama değil. Ürün; kaynakları
 açık, sınırlılıkları dürüst ve kendi repona uyarlanabilir **rehber içeriği**.
 Kurulacak bir şey yok; kopyalanacak şablonlar ve okunacak gerekçeler var.
-Tek istisna `tools/criteria_coverage.py` — hedef repo için referans bir kontrol,
-kendi testleriyle gelir.
 
 Son araştırma güncellemesi: **2026-07-25** ·
 yöntem: [Web + Reddit Saha Rehberi](docs/09-web-reddit-field-guide.md)
@@ -126,7 +124,7 @@ docs/                       ← "neden" bölümü, şablon doldurmak için gerek
                               dış bulgu → sınırlılık → rehber kararı
 
 stacks/                     stack eşlemeleri: backend · Flutter · Unity
-ci/, tools/, specs/, tests/ hedef repo örnekleri (bu repoda kurulu değil)
+ci/                         hedef repo için referans CI pipeline örneği
 AGENTS.md                   bu REHBERE katkı yapan ajanlar için
                             (projendeki ajanlar için → harness/AGENTS.template.md)
 ```
@@ -134,9 +132,9 @@ AGENTS.md                   bu REHBERE katkı yapan ajanlar için
 > `AGENTS.md` ile `harness/AGENTS.template.md` karıştırılmasın: ilki bu rehber
 > repo'sunda çalışan ajanı, ikincisi **senin projendeki** ajanı yönetir.
 
-`stacks/`, `templates/`, `ci/`, `tools/`, `specs/` ve `tests/` altındaki
-artefaktlar “bu repoda kurulması gereken mimari” değildir. Bunlar yalnız hedef
-kod repolarında tartışılan pratikleri somutlaştıran örneklerdir.
+`stacks/`, `templates/` ve `ci/` altındaki artefaktlar “bu repoda kurulması gereken
+mimari” değildir. Bunlar yalnız hedef kod repolarında tartışılan pratikleri
+somutlaştıran örneklerdir.
 
 ## Kanıt hiyerarşisi
 

@@ -105,7 +105,7 @@ Fast lane'de tam suite yerine bu alt kümeyi koş.
 dart analyze --fatal-infos \
   && dart run dart_code_metrics:metrics check-unused-code lib \
   && <fitness-check> \
-  && python3 tools/criteria_coverage.py \
+  && <criteria-coverage-check> \
   && flutter test <impact-selected-paths>
 ```
 

@@ -88,7 +88,7 @@ Gate'ler:
 ```bash
 # hedef repo p95 SLO'su — push etmeden önce yeşil olmalı
 <typecheck> && <lint> && <fitness-check> && <secret-scan-diff> \
-  && python3 tools/criteria_coverage.py \
+  && <criteria-coverage-check> \
   && <impact-selected-tests>
 ```
 

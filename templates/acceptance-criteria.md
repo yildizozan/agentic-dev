@@ -15,7 +15,7 @@ risk: normal              # normal | high  → high ise G2 zorunlu (docs/05 §3.
 # AC-001 — <başlık>
 
 > **Kural:** `approved: true` olmadan bu AC'ye karşı implementasyon başlamaz.
-> `criteria_coverage.py` onaysız aktif AC'de build'i kırar.
+> Kriter kapsaması kontrolü onaysız aktif AC'de build'i kırar (`docs/02` §2.1).
 > `approved_by` yalnız metadata'dır; gerçek G1 kanıtı protected CODEOWNERS review
 > veya eşdeğer imzalı attestation'dır. Serbest metin tek başına onay sayılmaz.
 

@@ -19,7 +19,7 @@
 | 3 | **Ajan yetki sınırları / sandbox** — yasakları çalıştırılamaz hale getir | **insan** | [`06` §5](06-operations.md) |
 | 3 | Secret scan + SCA + Semgrep baseline | Security ajanı | [`02` §3.7](02-spec-fidelity.md) |
 | 3 | `.gitattributes` + yüksek çekişmeli dosya politikası; semantik dosyalarda otomatik union/ours yok | Tech Lead | [`03` §6](03-concurrency.md) |
-| 4 | AC şablonu + `criteria_coverage.py` fast lane'e bağlanır | PM ajanı + Tech Lead | [`tools/`](../tools/criteria_coverage.py) |
+| 4 | AC şablonu + kriter kapsaması kontrolü fast lane'e bağlanır | PM ajanı + Tech Lead | [`02` §2.1](02-spec-fidelity.md) |
 | 4 | **Impact analysis skill dosyası** — hangi testi koş | Tech Lead ajanı | [`04` §5](04-codebase-integrity.md) |
 | 4 | Grounding protokolü ajan prompt'una gömülür | Tech Lead | [`04` §7](04-codebase-integrity.md) |
 | 5 | **Tek feature'ı uçtan uca yeni akışla koştur** | Tüm roller + **insan G1** | §2 |

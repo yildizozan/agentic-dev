@@ -22,7 +22,7 @@ v1.0'ın CI sırası merge gate'ine kadar **~26 dakika**, E2E dahil ~36 dakika s
 │ 3. Secret scan (diff)                        ~10 sn  │
 │ 4. IMPACT-SEÇİLMİŞ testler (tam suite DEĞİL) ~60 sn  │  ← 04 §5
 │ 5. Contract şema doğrulama (diff)            ~20 sn  │
-│ 6. Criteria coverage checker                  ~5 sn  │  ← tools/
+│ 6. Kriter kapsaması kontrolü                  ~5 sn  │  ← 02 §2.1
 └────────────────────────────────────────────────────────┘
                           ▼  yeşilse PR açılabilir
 ┌─ MERGE LANE ──────────────────────────── repo p95 SLO ┐

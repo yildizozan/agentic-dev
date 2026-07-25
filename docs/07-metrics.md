@@ -27,7 +27,7 @@ Gate eşikleri repoda sürüm kontrollü, görünür ve lokal olarak yeniden
 
 | Metrik | Başlangıç kullanımı | Neyi yakalar | Kaynak |
 |---|---|---|---|
-| **Kriter kapsaması** (aktif AC'lerin doğrulanmış test referansı) | **Değişmez: %100** | Spec drift | [`tools/criteria_coverage.py`](../tools/criteria_coverage.py) |
+| **Kriter kapsaması** (aktif AC'lerin doğrulanmış test referansı) | **Değişmez: %100** | Spec drift | kapsama kontrolü ([`02` §2.1](02-spec-fidelity.md)) |
 | **Mutation skoru** (diff, kritik modüller) | Baseline → repo eşiği | Sahte/boş testler | incremental mutation |
 | **Harici gizli evaluator geçme oranı** | İzolasyon kurulunca baseline → repo eşiği | Görünür teste overfit / spec gaming | dış trust boundary |
 | **Değişim kapsaması** (diff coverage) | Baseline → repo eşiği | Test edilmemiş ajan çıktısı | merge lane |

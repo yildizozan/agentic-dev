@@ -38,7 +38,7 @@ Ajan bu bölümü doldurmaz (`docs/05-roles.md` §3.2).
 
 ### 4.1 Bu AC'yi referans veren testler
 ```
-<criteria_coverage.py çıktısı veya: grep -rl "AC-###" tests/>
+<kriter kapsaması kontrolü çıktısı veya: grep -rl "AC-###" tests/>
 ```
 
 ### 4.2 O testlerin kapsadığı kod
@@ -72,7 +72,7 @@ Ajan bu bölümü doldurmaz (`docs/05-roles.md` §3.2).
 - [ ] 3. Gizli set varyantı güncellendi + manifest kontrol edildi
 - [ ] 4. Engineer implement etti — **ayrı PR**
 - [ ] 5. Eski versiyonun testi silindi
-- [ ] 6. `criteria_coverage.py` yeşil (yeni versiyon testli, öksüz referans yok)
+- [ ] 6. Kriter kapsaması kontrolü yeşil (yeni versiyon testli, öksüz referans yok)
 
 ## 7. Geri alma planı
 

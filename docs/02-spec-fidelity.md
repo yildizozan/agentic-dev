@@ -67,14 +67,20 @@ Vizyon / Constitution
 
 > Her `AC-###` için, **görünür test suite'inde veya gizli set manifest'inde** o ID'yi referans veren en az bir test bulunmak ZORUNLUDUR. Bulunmuyorsa build kırmızıdır.
 
-Bu, "coverage" değil **kriter kapsaması (criteria coverage)** ölçer. Uygulayan: [`tools/criteria_coverage.py`](../tools/criteria_coverage.py).
+Bu, "coverage" değil **kriter kapsaması (criteria coverage)** ölçer.
+
+Hedef repoda uygulaması küçük bir tarama işidir: AC dosyalarından ID'leri topla,
+test kaynaklarında ara, eşleşmeyeni raporla. İki yönde de çalışması gerekir —
+**testsiz AC** ve **var olmayan AC'ye referans veren test**, ikisi de hata.
+Fixture/örnek ID üreten dosyalar için bir muafiyet işareti gerekir; muafiyetin
+kapsama *üretememesi* önemlidir, yoksa gate'i atlatma yoluna dönüşür.
 
 > **Not — v1.0'daki çelişki düzeltilmiştir.** Önceki sürüm “her AC'nin
 > CI'da testi olmalı” derken testlerin bir bölümünü ajanın göremeyeceği yerde
 > tutuyordu. Çözüm: harici evaluator, içerik sızdırmadan yalnız kapsadığı AC
-> kimliklerinin manifest'ini yayınlar (`tests/hidden/manifest.txt`). Checker bu
-> beyanı görünür referanslarla birlikte sayar; manifest testin doğru olduğunu
-> değil, hangi AC için dış değerlendirme bulunduğunu gösterir.
+> kimliklerinin manifest'ini yayınlar (ör. `tests/hidden/manifest.txt`). Kapsama
+> kontrolü bu beyanı görünür referanslarla birlikte sayar; manifest testin doğru
+> olduğunu değil, hangi AC için dış değerlendirme bulunduğunu gösterir.
 
 ### 2.2 AC formatı
 
@@ -193,14 +199,19 @@ Her davranış oracle'ı `AC-###` etiketi taşır. Baseline checker AC düzeyind
 referans/hidden manifest eşlemesini doğrular. Test-başına kesin eşleme için hedef
 stack adapter'ı framework collector çıktısını normalize etmelidir.
 
-Checker iki yönde de çalışır: testsiz AC **ve** var olmayan AC'ye referans veren test, ikisi de hata.
+Kontrol iki yönde de çalışır: testsiz AC **ve** var olmayan AC'ye referans veren
+test, ikisi de hata.
 
-**Fixture istisnası.** Fixture/örnek kriter ID'si üreten dosyalar
-`criteria-coverage:ignore-file` işareti taşır. Bu dosyayı hedefleyen `.tags`
-beyanındaki path gerçekten var olmak zorundadır; doğrulanmış beyan yoksa build
-kırılır. Atlanan dosya sayısı raporda görünür.
+**Fixture muafiyeti.** Örnek/fixture kriter ID'si üreten dosyalar (kapsama
+kontrolünün kendi testleri gibi) bir muafiyet işareti taşır. İki tasarım şartı:
+muafiyet yalnız referans *kaldırabilir*, kapsama **üretemez** — böylece kötüye
+kullanımı build'i kırmızılaştırır, yeşillendirmez; ve muaf tutulan dosya sayısı
+raporda **görünür** olur, sessiz istisna kalmaz.
 
-> **Tuzak:** Taranan bir dosyanın *yorumunda* bile var olmayan bir AC ID'si geçerse öksüz referans olarak raporlanır. Bu repo kurulurken iki kez yaşandı; `tests/acceptance/AC-001.tags` içinde kayıtlı.
+> **Pratikte çıkan tuzak:** Taranan bir dosyanın *yorumunda* geçen var olmayan bir
+> AC ID'si de öksüz referans olarak raporlanır. Muafiyet işaretinin kendisini
+> muafiyet beyan dosyasına yazmak da o beyanı atlatır. İkisi de kurulum sırasında
+> yaşanır; tarama kapsamını baştan yazılı hale getir.
 
 ### 4.7 Değişim kapsaması (change coverage) (ZORUNLU)
 

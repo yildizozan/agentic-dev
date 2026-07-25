@@ -54,13 +54,30 @@ yerine mevcut bölümü keskinleştir. Uzun kural dosyası okunmaz.
 
 ## Doğrulama
 
-Kod testi veya TDD gerekmez. PR öncesi:
+Bu repo Markdown üretir; kod testi veya TDD gerekmez. PR öncesi:
 
 ```bash
-# yerel linkler sağlam mı
-grep -roE '\]\([^)h][^)]*\)' --include='*.md' . | head -50   # gözle kontrol
-python3 tools/criteria_coverage.py                            # varsa yeşil kalsın
-git diff --check                                              # whitespace
+# 1. yerel markdown linkleri gerçekten var mı  (kod bloklarını atlar)
+python3 - <<'EOF'
+import re, pathlib
+fence, link = re.compile(r"^\s*```"), re.compile(r"\]\((?!https?:|#)([^)]+)\)")
+for f in pathlib.Path(".").rglob("*.md"):
+    if ".git" in f.parts: continue
+    inside = False
+    for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+        if fence.match(line): inside = not inside; continue
+        if inside: continue
+        for m in link.finditer(line):
+            t = m.group(1).split("#")[0]
+            if t and not (f.parent / t).exists():
+                print(f"KIRIK {f}:{n} -> {m.group(1)}")
+EOF
+
+# 2. whitespace
+git diff --check
+
+# 3. proje adı yasağı (madde 2) — deny-list'i kendin doldur, repoya yazma
+grep -rniE 'yasakli-ad-1|yasakli-ad-2' --include='*.md' . && echo IHLAL
 ```
 
 Kontrol listesi:
